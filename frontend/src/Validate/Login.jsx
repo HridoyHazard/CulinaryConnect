@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import "./auth.css";
-import { Link, useNavigate , useLocation} from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowForward } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { Authenticate } from "./AuthContext";
@@ -53,14 +53,20 @@ const Login = () => {
   //User Details View
   const [open, setOpen] = React.useState(false);
 
-  const {register,handleSubmit,formState:{errors}}=useForm()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   //auth function
   const { setAuth } = useContext(Authenticate);
 
   const submitHandler = async (data) => {
-
     try {
-      const res = await login({ email: data.Email, password: data.Psw }).unwrap();
+      const res = await login({
+        email: data.Email,
+        password: data.Psw,
+      }).unwrap();
 
       console.log(res);
       dispatch(setCredentials({ ...res }));
@@ -128,6 +134,9 @@ const Login = () => {
                 Login
               </Button>
             </Box>
+            <Typography sx={{ textAlign: "center", marginTop: 2 }}>
+              Don't have an account? <Link to="/register">Register Here</Link>
+            </Typography>
           </Card>
         </form>
       </Box>

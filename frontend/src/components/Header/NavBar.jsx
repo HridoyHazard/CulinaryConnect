@@ -75,9 +75,15 @@ export default function NavBar() {
       <AppBar sx={{ backgroundColor: "white" }} position="static">
         <Toolbar>
           <Typography
-            variant="h5"
+            variant="h6"
             component="div"
-            sx={{ flexGrow: 1, color: "#e52b34", fontSize: "30px" }}
+            sx={{
+              flexGrow: 1,
+              color: "#e52b34",
+              fontSize: "35px",
+              fontFamily: '"Dancing Script", cursive',
+              fontWeight: 600,
+            }}
           >
             Culinary Connect
           </Typography>

@@ -3,7 +3,10 @@ import { Route, Routes } from 'react-router-dom'
 import HomePage from '../pages/HomePage'
 import Loader from '../components/Loading/Loading'
 import Login from '../Validate/Login'
+import Register from '../Validate/Register'
 import Logout from '../Validate/Logout'
+import UserProfile from '../Validate/UserProfile'
+
 
 // Lasy load to import the Pages
 const Menu =React.lazy(()=>import('../pages/MenuPage'))
@@ -34,7 +37,13 @@ const PageRoutes = () => {
 
       {/* Authentication Page*/}
       <Route path='login' element={<Login/>} />
+      <Route path='register' element={<Register/>} />
       <Route path='logout' element={<Logout/>} />
+
+      {/* User Profile Page*/}
+      <Route path='profile' element={<UserProfile/>} />
+
+
     </Routes>
     </React.Suspense>
   )

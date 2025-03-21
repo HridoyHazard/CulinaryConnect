@@ -111,7 +111,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 // @desc    Update users By Id
-// @route   PUT /api/users/:id
+// @route   PUT /api/users/profile
 // @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
