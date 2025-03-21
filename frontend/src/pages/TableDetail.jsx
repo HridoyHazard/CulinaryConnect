@@ -6,32 +6,17 @@ import "../components/TableLayout/tablelayout.css";
 import Loader from "../components/Loading/Loading";
 import axios from "axios";
 
+import { useGetTableDetailsQuery } from "../Slice/tableSlice";
+
 const TableDetail = () => {
   // url to getting Table Id
   let { id } = useParams();
 
-  const [table, setTable] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Fetching Table Data
+  const { data: table, error, isLoading } = useGetTableDetailsQuery(id);
 
-  // Fetch the table data using Axios
-  useEffect(() => {
-    const fetchTableData = async () => {
-      try {
-        // Make the GET request to fetch table data by ID
-        const response = await axios.get(
-          `http://localhost:5000/api/tables/${id}`
-        );
-        setTable(response.data); // Set the fetched table data
-        setIsLoading(false); // Set loading state to false
-      } catch (err) {
-        setError("Failed to fetch table data"); // Set error state if request fails
-        setIsLoading(false); // Set loading state to false
-      }
-    };
-
-    fetchTableData();
-  }, [id]);
+  console.log("Table", table);
+  console.log("Error", error);
 
   return (
     <Container

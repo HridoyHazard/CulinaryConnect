@@ -3,26 +3,14 @@ import React from "react";
 import TableLayout from "../components/TableLayout/TableLayout";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "../components/Loading/Loading";
-import axios from "axios";
+import { useGetTablesQuery } from "../Slice/tableSlice";
 const TablePage = () => {
 
-  const TableData = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/tables"); // Axios GET request
-      console.log(response.data);
-      return response.data; // Return the data from the response
-    } catch (error) {
-      throw new Error("Failed to fetch data: " + error.message); // Handle error if request fails
-    }
-  };
+  const { data: Table, error, isLoading } = useGetTablesQuery();
 
-  const { isLoading, data } = useQuery({
-    queryKey: ["table"],
-    queryFn: TableData,
-  });
-  const Table = data || [];
+  console.log("Table", Table);
+  console.log("Error", error);
 
-  if (isLoading) return <Loader />;
   return (
     <Container className="Table-page">
       <Typography className="first-title" variant="h6">
@@ -33,7 +21,7 @@ const TablePage = () => {
       </Typography>
       {
         //Table Details  mapping in Layout
-        Table.length ? (
+        Table?.length ? (
           <TableLayout table={Table} />
         ) : (
           <Typography

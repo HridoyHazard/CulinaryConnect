@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 // @desc    Auth user & get token
-// @route   POST /api/users/login
+// @route   POST /api/users/auth
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -55,7 +55,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 
