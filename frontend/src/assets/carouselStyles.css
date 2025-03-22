@@ -23,7 +23,7 @@
   }
   
   .slick-next {
-    right: -30px; /* Positions next arrow */
+    right: -70px; /* Positions next arrow */
   }
   
   .slick-prev:before, .slick-next:before {

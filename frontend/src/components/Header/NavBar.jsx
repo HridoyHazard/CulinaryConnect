@@ -2,6 +2,7 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
@@ -31,6 +32,9 @@ export default function NavBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [userAnchorEl, setUserAnchorEl] = React.useState(null);
   const { userInfo } = useSelector((state) => state.auth);
+  const { cartItems } = useSelector((state) => state.cart);
+
+  console.log(cartItems);
 
   console.log(userInfo);
 
@@ -87,13 +91,21 @@ export default function NavBar() {
           >
             Culinary Connect
           </Typography>
-          <div>
-            <Badge color="warning" variant="dot">
-              <Link to="/orders">
-                <LocalMallIcon color="error" />
-              </Link>
+          <IconButton
+            component={Link}
+            to="/cart"
+            size="large"
+            color="error"
+          >
+            <Badge 
+              badgeContent={cartItems.reduce((acc, item) => acc + (item.quantity || item.qty || 1), 0)} 
+              color="error"
+              overlap="circular"
+            >
+              <ShoppingCartIcon />
             </Badge>
-
+          </IconButton>
+          <div>
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -101,7 +113,7 @@ export default function NavBar() {
               aria-haspopup="true"
               onClick={handleMenu}
               color="error"
-              sx={{ margin: "0 15px" }}
+              sx={{ margin: "0 10px" }}
             >
               <WidgetsIcon />
             </IconButton>
@@ -230,108 +242,5 @@ export default function NavBar() {
         </Toolbar>
       </AppBar>
     </Box>
-    // <Box sx={{ flexGrow: 1 }}>
-    //   <AppBar sx={{ backgroundColor: "white" }} position="static">
-    //     <Toolbar>
-    //       <Typography
-    //         variant="h5"
-    //         component="div"
-    //         sx={{ flexGrow: 1, color: "#e52b34", fontSize: "30px" }}
-    //       >
-    //         Culinary Connect
-    //       </Typography>
-    //       <div>
-    //         <Badge color="warning" variant="dot">
-    //           <Link to="/orders">
-    //             <LocalMallIcon color="error" />
-    //           </Link>
-    //         </Badge>
-    //         <IconButton
-    //           size="large"
-    //           aria-label="main menu"
-    //           onClick={handleMenu}
-    //           color="error"
-    //           sx={{ margin: "0 15px" }}
-    //         >
-    //           <WidgetsIcon />
-    //         </IconButton>
-    //         {userInfo ? (
-    //           <Button
-    //             color="inherit"
-    //             startIcon={<Avatar>{userInfo.name}</Avatar>}
-    //             onClick={handleUserMenu}
-    //             aria-label="user menu"
-    //           >
-    //             {userInfo.name}
-    //           </Button>
-    //         ) : (
-    //           <Link to="/login">
-    //             <MenuItem onClick={handleClose}>
-    //               <Button startIcon={<AdminPanelSettingsIcon />}>Login</Button>
-    //             </MenuItem>
-    //           </Link>
-    //         )}
-    //       </div>
-    //     </Toolbar>
-    //   </AppBar>
-    //   <Menu
-    //     id="menu-appbar"
-    //     anchorEl={anchorEl}
-    //     anchorOrigin={{ vertical: "top", horizontal: "right" }}
-    //     keepMounted
-    //     transformOrigin={{ vertical: "top", horizontal: "right" }}
-    //     open={Boolean(anchorEl)}
-    //     onClose={handleClose}
-    //   >
-    //     <MenuItem onClick={handleClose}>
-    //       <Button component={Link} to="/home" startIcon={<HomeIcon />}>
-    //         Home
-    //       </Button>
-    //     </MenuItem>
-    //     <MenuItem onClick={handleClose}>
-    //       <Button
-    //         component={Link}
-    //         to="/menu"
-    //         startIcon={<RestaurantMenuIcon />}
-    //       >
-    //         Menu
-    //       </Button>
-    //     </MenuItem>
-    //     <MenuItem onClick={handleClose}>
-    //       <Button component={Link} to="/tables" startIcon={<TocIcon />}>
-    //         Tables
-    //       </Button>
-    //     </MenuItem>
-    //     <MenuItem onClick={handleClose}>
-    //       <Button component={Link} to="/booking" startIcon={<BookOnlineIcon />}>
-    //         Bookings
-    //       </Button>
-    //     </MenuItem>
-    //   </Menu>
-    //   {userInfo && (
-    //     <Menu
-    //       id="user-menu"
-    //       anchorEl={userAnchorEl}
-    //       anchorOrigin={{ vertical: "top", horizontal: "right" }}
-    //       keepMounted
-    //       transformOrigin={{ vertical: "top", horizontal: "right" }}
-    //       open={Boolean(userAnchorEl)}
-    //       onClose={handleUserClose}
-    //     >
-    //       <MenuItem onClick={handleUserClose}>
-    //         <Button
-    //           component={Link}
-    //           to="/profile"
-    //           startIcon={<AccountCircleRounded />}
-    //         >
-    //           Profile
-    //         </Button>
-    //       </MenuItem>
-    //       <MenuItem onClick={logoutHandler}>
-    //         <Button startIcon={<ExitToApp />}>Logout</Button>
-    //       </MenuItem>
-    //     </Menu>
-    //   )}
-    // </Box>
   );
 }

@@ -120,27 +120,6 @@ const TableCard = () => {
         </FormControl>
 
         <FormControl sx={{width:'330px'}}>
-        <InputLabel color='success' id="guest-label">Guest</InputLabel>
-        <Select
-        {...register('guest',{required:"guest Field Required"})} 
-          labelId="guest-label"
-          label="Guest"
-          error={errors.guest ? true :false} 
-          color="success"
-          onChange={GuestCountChange}
-          defaultValue=''
-          >
-          <MenuItem disabled value=''></MenuItem>
-          <MenuItem value='1'>1 Person</MenuItem>
-          <MenuItem value='2'>2 Person</MenuItem>
-          <MenuItem value='3'>3 Person</MenuItem>
-          <MenuItem value='4'>4 Person</MenuItem>
-          <MenuItem value='5'>5 Person</MenuItem>
-
-        </Select>
-        </FormControl>
-
-        <FormControl sx={{width:'330px'}}>
         <InputLabel color='success' id="table-label">Table</InputLabel>
         <Select
         {...register('table',{required:"Table Field Required"})} 

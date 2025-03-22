@@ -73,16 +73,16 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/logout
 // @access  Public
 const logoutUser = asyncHandler(async (req, res) => {
-  res.clearCookie('jwt', {
+  res.clearCookie("jwt", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
   });
-  
-  res.status(200).json({ 
+
+  res.status(200).json({
     success: true,
-    message: 'Logged out successfully' 
+    message: "Logged out successfully",
   });
 });
 
@@ -114,8 +114,12 @@ const deleteUser = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/profile
 // @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.user._id);
   if (user) {
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     user.isAdmin = req.body.isAdmin || user.isAdmin;
@@ -134,5 +138,5 @@ export {
   getUserById,
   deleteUser,
   updateUser,
-  logoutUser
+  logoutUser,
 };
