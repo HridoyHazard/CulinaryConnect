@@ -143,6 +143,39 @@ const menuData = [
       },
     ],
   },
+  {
+    section_name: "Beverages",
+    items: [
+      {
+        name: "Coffee",
+        description: "Freshly brewed coffee",
+        price: 2.99,
+        image:
+          "https://res.cloudinary.com/dfyewpdn8/image/upload/v1742462976/Culinary/beverage/lg2xjbhyqr19ohkgojhr.png",
+      },
+      {
+        name: "Tea",
+        description: "Hot tea with various flavors",
+        price: 1.99,
+        image:
+          "https://res.cloudinary.com/dfyewpdn8/image/upload/v1742413148/Culinary/beverage/mtlegbldyndag2kgaymt.png",
+      },
+      {
+        name: "Lemon Soda",
+        description: "Refreshing Lemon Soda",
+        price: 3.99,
+        image:
+          "https://res.cloudinary.com/dfyewpdn8/image/upload/v1742412875/Culinary/beverage/gat3lksikfcyqugkwfaa.png",
+      },
+      {
+        name: "Orage Juice",
+        description: "Amazing Orange Juice",
+        price: 2.5,
+        image:
+          "https://res.cloudinary.com/dfyewpdn8/image/upload/v1742412875/Culinary/beverage/pbvdstzcdm1xwkloycmc.png",
+      },
+    ],
+  },
 ];
 
 export default menuData;

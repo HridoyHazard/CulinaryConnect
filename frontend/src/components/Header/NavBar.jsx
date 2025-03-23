@@ -98,7 +98,7 @@ export default function NavBar() {
             color="error"
           >
             <Badge 
-              badgeContent={cartItems.reduce((acc, item) => acc + (item.quantity || item.qty || 1), 0)} 
+              badgeContent={cartItems.length}
               color="error"
               overlap="circular"
             >

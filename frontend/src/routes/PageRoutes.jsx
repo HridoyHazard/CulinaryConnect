@@ -6,6 +6,7 @@ import Login from '../Validate/Login'
 import Register from '../Validate/Register'
 import Logout from '../Validate/Logout'
 import UserProfile from '../Validate/UserProfile'
+import CartPage from '../pages/CartPage'
 
 
 // Lasy load to import the Pages
@@ -42,6 +43,11 @@ const PageRoutes = () => {
 
       {/* User Profile Page*/}
       <Route path='profile' element={<UserProfile/>} />
+
+      {/* Cart Page*/}
+      <Route path='cart' element={<CartPage/>} />
+
+      {/* Booking Page*/}
 
 
     </Routes>
