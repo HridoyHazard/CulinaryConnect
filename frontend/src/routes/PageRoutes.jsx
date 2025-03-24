@@ -7,6 +7,8 @@ import Register from '../Validate/Register'
 import Logout from '../Validate/Logout'
 import UserProfile from '../Validate/UserProfile'
 import CartPage from '../pages/CartPage'
+import Information from '../components/Booking/Information'
+import TableBook from '../components/Booking/TableBook'
 
 
 // Lasy load to import the Pages
@@ -48,6 +50,8 @@ const PageRoutes = () => {
       <Route path='cart' element={<CartPage/>} />
 
       {/* Booking Page*/}
+      <Route path='information' element={<Information/>} />
+      <Route path='tablebook' element={<TableBook/>} />
 
 
     </Routes>

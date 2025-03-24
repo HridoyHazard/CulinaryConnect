@@ -3,7 +3,12 @@ import { updateCart } from "../utils/cartUtils.js";
 
 const initialState = localStorage.getItem("cart")
   ? JSON.parse(localStorage.getItem("cart"))
-  : { cartItems: [], paymentMethod: "" };
+  : {
+      cartItems: [],
+      bookingInformation: {},
+      selectedTables: [],
+      paymentMethod: "",
+    };
 
 const cartSlice = createSlice({
   name: "cart",
@@ -24,20 +29,29 @@ const cartSlice = createSlice({
       return updateCart(state);
     },
     updateQuantity: (state, action) => {
-
       const { id, quantity } = action.payload;
       const item = state.cartItems.find((x) => x._id === id);
-      
+
       if (item) {
-        item.quantity = quantity; 
+        item.quantity = quantity;
       }
-      
+
       return updateCart(state);
     },
 
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter((x) => x._id !== action.payload);
 
+      return updateCart(state);
+    },
+
+    selectedTables: (state, action) => {
+      state.selectedTables = action.payload;
+      return updateCart(state);
+    },
+
+    bookingInformation: (state, action) => {
+      state.bookingInformation = action.payload;
       return updateCart(state);
     },
 
@@ -52,6 +66,13 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addToCart, removeFromCart, savePaymentMethod, clearCartItems, updateQuantity } =
-  cartSlice.actions;
+export const {
+  addToCart,
+  removeFromCart,
+  savePaymentMethod,
+  clearCartItems,
+  updateQuantity,
+  bookingInformation,
+  selectedTables,
+} = cartSlice.actions;
 export default cartSlice.reducer;
