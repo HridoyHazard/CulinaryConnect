@@ -9,6 +9,7 @@ import UserProfile from '../Validate/UserProfile'
 import CartPage from '../pages/CartPage'
 import Information from '../components/Booking/Information'
 import TableBook from '../components/Booking/TableBook'
+import Checkout from '../components/Booking/Checkout'
 
 
 // Lasy load to import the Pages
@@ -52,6 +53,7 @@ const PageRoutes = () => {
       {/* Booking Page*/}
       <Route path='information' element={<Information/>} />
       <Route path='tablebook' element={<TableBook/>} />
+      <Route path='checkout' element={<Checkout/>} />
 
 
     </Routes>

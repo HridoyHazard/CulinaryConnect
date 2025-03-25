@@ -1,5 +1,15 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Reservation from "../models/Reservation.js";
+// import paypal from "@paypal/checkout-server-sdk";
+
+// PayPal Client Setup
+// const paypalClient = new paypal.core.PayPalHttpClient(
+//   new paypal.core.SandboxEnvironment(
+//     process.env.PAYPAL_CLIENT_ID,
+//     process.env.PAYPAL_CLIENT_SECRET
+//   )
+// );
+
 
 // @desc    Get all reservations
 // @route   GET /api/reservations
@@ -19,6 +29,30 @@ const createReservation = asyncHandler(async (req, res) => {
     throw new Error("Invalid data");
   }
   res.status(201).json(reservation);
+});
+
+// @desc    Create PayPal order with AUTHORIZE intent
+// @route   POST /api/paypal/create-order
+// @access  Private
+const createPayPalOrder = asyncHandler(async (req, res) => {
+  const request = new paypal.orders.OrdersCreateRequest();
+  request.requestBody({
+    intent: "AUTHORIZE",
+    purchase_units: [{
+      amount: {
+        currency_code: "USD",
+        value: req.body.amount, // Amount from frontend
+      },
+    }],
+  });
+
+  try {
+    const response = await paypalClient.execute(request);
+    res.json({ orderID: response.result.id });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Failed to create PayPal order");
+  }
 });
 
 // @desc    Get reservation by ID

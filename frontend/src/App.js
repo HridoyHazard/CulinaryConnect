@@ -2,16 +2,14 @@ import React from "react";
 import Layout from "./routes/Layout";
 import { ToastContainer } from "react-toastify";
 import { Provider } from "react-redux";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import store from "./store";
 import "react-toastify/dist/ReactToastify.css";
-import AuthContext from "./Validate/AuthContext";
 
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-const clientQuery = new QueryClient();
 const App = () => {
   return (
     <Provider store={store}>
-      <QueryClientProvider client={clientQuery}>
+      <PayPalScriptProvider options={{ "client-id": "sb" }}>
         <ToastContainer
           autoClose={3000}
           style={{ width: 250 }}
@@ -21,12 +19,10 @@ const App = () => {
           draggable={false}
           pauseOnHover={false}
         />
-        {/* auth config  */}
-        <AuthContext>
-          {/* page layout  */}
-          <Layout />
-        </AuthContext>
-      </QueryClientProvider>
+
+        {/* page layout  */}
+        <Layout />
+      </PayPalScriptProvider>
     </Provider>
   );
 };

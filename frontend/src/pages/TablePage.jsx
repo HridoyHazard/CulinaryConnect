@@ -1,7 +1,6 @@
 import { Container, Typography } from "@mui/material";
 import React from "react";
 import TableLayout from "../components/TableLayout/TableLayout";
-import { useQuery } from "@tanstack/react-query";
 import Loader from "../components/Loading/Loading";
 import { useGetTablesQuery } from "../Slice/tableSlice";
 const TablePage = () => {
