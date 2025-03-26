@@ -4,6 +4,5 @@ export const USERS_URL = "/api/users";
 export const RESERVATIONS_URL = "/api/reservations";
 export const TABLES_URL = "/api/tables";
 export const MENUS_URL = "/api/menus";
-export const PAYPAL_URL = "/api/config/paypal";
 // export const UPLOAD_URL = "/api/upload";
 

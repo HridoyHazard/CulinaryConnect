@@ -69,6 +69,7 @@ const loginUser = asyncHandler(async (req, res) => {
   });
   res.json({ user, token });
 });
+
 // @desc    Logout Users
 // @route   POST /api/users/logout
 // @access  Public

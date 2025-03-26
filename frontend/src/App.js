@@ -9,20 +9,18 @@ import "react-toastify/dist/ReactToastify.css";
 const App = () => {
   return (
     <Provider store={store}>
-      <PayPalScriptProvider options={{ "client-id": "sb" }}>
-        <ToastContainer
-          autoClose={3000}
-          style={{ width: 250 }}
-          position="bottom-left"
-          hideProgressBar={false}
-          pauseOnFocusLoss={false}
-          draggable={false}
-          pauseOnHover={false}
-        />
+      <ToastContainer
+        autoClose={3000}
+        style={{ width: 250 }}
+        position="bottom-left"
+        hideProgressBar={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover={false}
+      />
 
-        {/* page layout  */}
-        <Layout />
-      </PayPalScriptProvider>
+      {/* page layout  */}
+      <Layout />
     </Provider>
   );
 };

@@ -8,37 +8,20 @@ export const reservationSlice = apiSlice.injectEndpoints({
       providesTags: ["Reservation"],
       keepUnusedDataFor: 5,
     }),
-    createPayPalOrder: builder.mutation({
-      query: (amount) => ({
-        url: `${PAYPAL_URL}/create-order`,
-        method: "POST",
-        body: { amount },
-      }),
-      invalidatesTags: ["Reservation"],
-    }),
-    authorizePayment: builder.mutation({
-      query: (orderID) => ({
-        url: `${PAYPAL_URL}/authorize/${orderID}`,
-        method: "POST",
-      }),
-    }),
-    capturePayment: builder.mutation({
-      query: (authorizationID) => ({
-        url: `${PAYPAL_URL}/capture/${authorizationID}`,
-        method: "POST",
-      }),
-      invalidatesTags: ["Reservation"],
-    }),
     createReservation: builder.mutation({
-      query: ({ reservationData, authorizationID }) => ({
+      query: (reservationData) => ({
         url: RESERVATIONS_URL,
         method: "POST",
-        body: {
-          ...reservationData,
-          authorizationID, // Link reservation to PayPal authorization
-        },
+        body: reservationData,
       }),
       invalidatesTags: ["Reservation"],
+    }),
+    processPayment: builder.mutation({
+      query: (paymentData) => ({
+        url: `${RESERVATIONS_URL}/payment`,
+        method: "POST",
+        body: paymentData,
+      }),
     }),
   }),
 });
@@ -46,7 +29,5 @@ export const reservationSlice = apiSlice.injectEndpoints({
 export const {
   useGetReservationsQuery,
   useCreateReservationMutation,
-  useCreatePayPalOrderMutation,
-  useAuthorizePaymentMutation,
-  useCapturePaymentMutation,
+  useProcessPaymentMutation,
 } = reservationSlice;

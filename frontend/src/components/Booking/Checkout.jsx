@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Grid,
@@ -12,9 +12,8 @@ import {
   ListItemText,
   InputAdornment,
   IconButton,
-  FormControlLabel,
-  Checkbox,
   Chip,
+  Avatar,
 } from "@mui/material";
 import {
   CreditCard,
@@ -28,29 +27,78 @@ import {
   EventSeat,
   Restaurant,
 } from "@mui/icons-material";
+import { toast } from "react-toastify";
+
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/system";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import StripeCheckout from "react-stripe-checkout";
+import { useDispatch, useSelector } from "react-redux";
+import { formatDate, formatTime } from "../../utils/formatFunction";
+import { useCreateReservationMutation } from "../../Slice/reservationSlice";
 
 const Checkout = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvc: "",
-    agreeTerms: false,
-  });
+  const { userInfo } = useSelector((state) => state.auth);
+  const { bookingInformation, selectedTables, cartItems } = useSelector(
+    (state) => state.cart
+  );
 
-  const [errors, setErrors] = useState({
-    email: false,
-    phone: false,
-    cardNumber: false,
-    expiryDate: false,
-    cvc: false,
-  });
+  console.log("user", userInfo);
+  console.log(
+    "booking",
+    bookingInformation,
+    "tables",
+    selectedTables,
+    "items",
+    cartItems
+  );
+
+  // Use the hooks from reservationSlice
+  const [createReservation] = useCreateReservationMutation();
+
+  const CheckInDate = formatDate(bookingInformation.checkInDate);
+  const CheckInTime = formatTime(bookingInformation.checkInTime);
+  const CheckOutTime = formatTime(bookingInformation.checkOutTime);
+
+  async function onToken(token) {
+    const reservationDetails = {
+      userId: userInfo.user._id,
+      customer_name: bookingInformation.name,
+      customer_email: bookingInformation.email,
+      check_in_date: new Date(bookingInformation.checkInDate),
+      check_in_time: new Date(bookingInformation.checkInTime),
+      check_out_time: new Date(bookingInformation.checkOutTime),
+      totalAmount: parseFloat(calculateTotal()),
+      capacity: selectedTables.seating_capacity,
+      table_no: selectedTables.table_no,
+      itemsMenu: cartItems.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+      })),
+      token,
+    };
+
+    try {
+      const response = await createReservation(reservationDetails);
+      console.log("Reservation created:", response);
+      if (response.data) {
+        toast.success("Reservation created successfully");
+        
+      } else {
+        toast.error("Reservation creation failed");
+      }
+    } catch (error) {
+      console.error("Error creating reservation:", error);
+      toast.error("Reservation creation failed");
+    }
+  }
+
+  const handleSubmit = () => {
+    console.log("Cliked");
+  };
+
+  const navigate = useNavigate();
 
   // Mock data
   const tableInfo = {
@@ -61,47 +109,13 @@ const Checkout = () => {
     price: 49.99,
   };
 
-  const menuItems = [
-    { id: 1, name: "Margherita Pizza", price: 12.99, quantity: 2 },
-    { id: 2, name: "Caesar Salad", price: 8.99, quantity: 1 },
-    { id: 3, name: "Red Wine", price: 6.5, quantity: 3 },
-  ];
-
   const calculateTotal = () => {
-    const menuTotal = menuItems.reduce(
+    const menuTotal = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
     const tax = (tableInfo.price + menuTotal) * 0.1;
     return (tableInfo.price + menuTotal + tax).toFixed(2);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "agreeTerms" ? checked : value,
-    }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {
-      email: !/\S+@\S+\.\S+/.test(formData.email),
-      phone: !/^\d{10}$/.test(formData.phone),
-      cardNumber: formData.cardNumber.replace(/ /g, "").length !== 16,
-      expiryDate: !/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(formData.expiryDate),
-      cvc: formData.cvc.length < 3 || formData.cvc.length > 4,
-    };
-    setErrors(newErrors);
-    return !Object.values(newErrors).some((error) => error);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm() && formData.agreeTerms) {
-      console.log("Checkout data:", formData);
-      navigate("/confirmation");
-    }
   };
 
   return (
@@ -118,18 +132,21 @@ const Checkout = () => {
               <Person sx={{ mr: 1 }} /> Customer Information
             </Typography>
             <Box sx={{ mb: 3 }}>
-              <Typography>Name</Typography>
-              <Typography>Email</Typography>
+              <Typography>{bookingInformation.name}</Typography>
+              <Typography>{bookingInformation.email}</Typography>
               <Divider sx={{ my: 2 }} />
             </Box>
             <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
               <EventSeat sx={{ mr: 1 }} /> Table Details
             </Typography>
             <Box sx={{ mb: 3 }}>
-              <Chip label={`Table ${tableInfo.tableNumber}`} sx={{ mb: 1 }} />
-              <Typography>Date: {tableInfo.date}</Typography>
-              <Typography>Time: {tableInfo.time}</Typography>
-              <Typography>Capacity: {tableInfo.capacity} people</Typography>
+              <Chip label={`Table ${selectedTables.table_no}`} sx={{ mb: 1 }} />
+              <Typography>Date: {CheckInDate}</Typography>
+              <Typography>CheckInTime: {CheckInTime}</Typography>
+              <Typography>CheckOutTime: {CheckOutTime}</Typography>
+              <Typography>
+                Capacity: {selectedTables.seating_capacity} people
+              </Typography>
               <Divider sx={{ my: 2 }} />
             </Box>
 
@@ -137,8 +154,13 @@ const Checkout = () => {
               <Restaurant sx={{ mr: 1 }} /> Your Order
             </Typography>
             <List dense>
-              {menuItems.map((item) => (
-                <ListItem key={item.id} sx={{ py: 1 }}>
+              {cartItems.map((item, index) => (
+                <ListItem key={index} sx={{ py: 1 }}>
+                  <Avatar
+                    src={item.image} // Assuming 'image' is the property holding the image URL
+                    alt={item.name}
+                    sx={{ mr: 2, width: 40, height: 40 }}
+                  />
                   <ListItemText
                     primary={item.name}
                     secondary={`Quantity: ${item.quantity}`}
@@ -167,7 +189,7 @@ const Checkout = () => {
                   <Typography>${tableInfo.price}</Typography>
                   <Typography>
                     $
-                    {menuItems
+                    {cartItems
                       .reduce(
                         (sum, item) => sum + item.price * item.quantity,
                         0
@@ -175,10 +197,10 @@ const Checkout = () => {
                       .toFixed(2)}
                   </Typography>
                   <Typography>
-                    $
+                    $$
                     {(
                       (tableInfo.price +
-                        menuItems.reduce(
+                        cartItems.reduce(
                           (sum, item) => sum + item.price * item.quantity,
                           0
                         )) *
@@ -189,50 +211,23 @@ const Checkout = () => {
                 </Grid>
               </Grid>
             </Box>
-            <PayPalScriptProvider
-              options={{ "client-id": "YOUR_PAYPAL_CLIENT_ID" }}
-            >
-              <PayPalButtons
-                style={{ layout: "vertical" }}
-                createOrder={(data, actions) => {
-                  return actions.order.create({
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: calculateTotal(),
-                        },
-                      },
-                    ],
-                  });
-                }}
-                onApprove={(data, actions) => {
-                  return actions.order.capture().then((details) => {
-                    alert("Payment Successful!");
-                  });
-                }}
-              />
-            </PayPalScriptProvider>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onChange={handleInputChange}
-                  required
-                />
-              }
-              label="I agree to the terms and conditions"
-              sx={{ mt: 2 }}
+            <StripeCheckout
+              name="Culinary Connect Booking"
+              description={`Payment for Table No:${selectedTables.table_no}`}
+              amount={calculateTotal() * 100}
+              currency="USD"
+              token={onToken}
+              stripeKey="pk_test_51R6SjKARt0cv2wfi1su5am3VH4eaAwioaJkIpaNGVxRXTMn3xwygReuhQWr1VIU2NjEkRLqPtKCU3qS7znRoF73P00YWogZDJG"
             />
+
             <Button
               fullWidth
               variant="contained"
               size="large"
               sx={{ mt: 2 }}
               onClick={handleSubmit}
-              disabled={!formData.agreeTerms}
             >
-              Confirm Booking (${calculateTotal()})
+              Confirm Booking
             </Button>
           </Paper>
         </Grid>

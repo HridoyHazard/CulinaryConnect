@@ -2,19 +2,15 @@ import mongoose from "mongoose";
 
 const reservationSchema = new mongoose.Schema(
   {
-    tableId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Table",
+      ref: "User",
     },
     customer_name: {
       type: String,
       required: true,
     },
     customer_email: {
-      type: String,
-      required: true,
-    },
-    customer_contact: {
       type: String,
       required: true,
     },
@@ -30,18 +26,47 @@ const reservationSchema = new mongoose.Schema(
       type: String, // Store as string in "HH:MM" format
       required: true,
     },
-    number_of_guests: {
+    totalAmount: {
       type: Number,
       required: true,
+    },
+    capacity: {
+      type: Number,
+      required: true,
+    },
+    paymentId: {
+      type: String,
+      required: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["succeeded", "pending", "failed"],
+      default: "pending",
     },
     table_no: {
       type: Number,
       required: true,
     },
-    confirmed: {
-      type: Boolean,
-      default: false,
-    },
+    itemsMenu: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+        image: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
