@@ -16,12 +16,12 @@ export const reservationSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Reservation"],
     }),
-    processPayment: builder.mutation({
-      query: (paymentData) => ({
-        url: `${RESERVATIONS_URL}/payment`,
-        method: "POST",
-        body: paymentData,
+    cancelReservation: builder.mutation({
+      query: (id) => ({
+        url: `${RESERVATIONS_URL}/cancel/${id}`,
+        method: "PUT",
       }),
+      invalidatesTags: ["Reservation"],
     }),
   }),
 });
@@ -29,5 +29,5 @@ export const reservationSlice = apiSlice.injectEndpoints({
 export const {
   useGetReservationsQuery,
   useCreateReservationMutation,
-  useProcessPaymentMutation,
+  useCancelReservationMutation,
 } = reservationSlice;

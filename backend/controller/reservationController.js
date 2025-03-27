@@ -1,5 +1,6 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Reservation from "../models/Reservation.js";
+import Table from "../models/Table.js";
 import { v4 as uuidv4 } from "uuid";
 
 import Stripe from "stripe";
@@ -16,55 +17,6 @@ const getReservations = asyncHandler(async (req, res) => {
   const reservations = await Reservation.find({});
   res.json(reservations);
 });
-
-// const processPayment = asyncHandler(async (req, res) => {
-//   const { amount, token } = req.body;
-
-//   // Validate required fields
-//   if (!amount || !token) {
-//     res.status(400);
-//     throw new Error("Amount and token are required");
-//   }
-
-//   try {
-//     // Step 1: Process payment with Stripe (PaymentIntent)
-//     const paymentIntent = await stripe.paymentIntents.create({
-//       amount: Math.round(amount * 100), // Convert dollars to cents
-//       currency: "usd",
-//       payment_method_data: {
-//         // Use payment_method_data instead of payment_method
-//         type: "card",
-//         card: {
-//           token: token.id, // Stripe token from the frontend (this is your card token)
-//         },
-//       },
-//       confirm: true, // Automatically confirm the payment
-//       automatic_payment_methods: {
-//         enabled: true, // Enable automatic payment methods (no redirect-based methods)
-//         allow_redirects: "never", // Disallow redirects
-//       },
-//     });
-
-//     if (paymentIntent.status === "succeeded") {
-//       console.log("Payment succeeded");
-
-//       // Step 2: Send success response with the payment details (for use in creating the reservation)
-//       res.status(200).json({
-//         success: true,
-//         message: "Payment successful",
-//         paymentId: paymentIntent.id,
-//         paymentStatus: paymentIntent.status,
-//       });
-//     } else {
-//       res.status(400);
-//       throw new Error("Payment failed, status: " + paymentIntent.status);
-//     }
-//   } catch (error) {
-//     console.error("Error processing payment:", error);
-//     res.status(500);
-//     throw new Error(`Payment processing failed: ${error.message}`);
-//   }
-// });
 
 // @desc    Create reservation
 // @route   POST /api/reservations
@@ -119,10 +71,21 @@ const createReservation = asyncHandler(async (req, res) => {
         itemsMenu,
         paymentStatus: payment.status,
         paymentId: payment.id,
+        status: "Confirmed",
       });
-      
+
+      const updatedTable = await Table.findOneAndUpdate(
+        { table_no: table_no },
+        { $set: { status: "Booked" } },
+        { new: true }
+      );
+
+      if (!updatedTable) {
+        res.status(404);
+        throw new Error("Table not found");
+      }
+
       res.status(201).json(reservation);
-      
     }
   } catch (error) {
     return res.status(400).json({ message: error });
@@ -170,9 +133,46 @@ const deleteReservation = asyncHandler(async (req, res) => {
   res.json({ message: "Reservation removed" });
 });
 
+// @desc    Cancel reservation
+// @route   PUT /api/reservations/cancel/:id
+// @access  Private/Admin
+const cancelReservation = asyncHandler(async (req, res) => {
+  // Find the reservation and update the status to 'Cancelled'
+  const updateReservation = await Reservation.findByIdAndUpdate(
+    req.params.id,
+    { status: "Cancelled" }, // Update the status field to 'Cancelled'
+    { new: true } // Ensure the updated reservation is returned
+  );
+
+  // Check if the reservation exists
+  if (!updateReservation) {
+    return res.status(404).json({ message: "Reservation not found" });
+  }
+
+  // Update the table status to 'Available'
+  const updatedTable = await Table.findOneAndUpdate(
+    { table_no: updateReservation.table_no }, // Find the table by table number
+    { $set: { status: "Available" } },  // Set the status to 'Available'
+    { new: true } // Return the updated table document
+  );
+
+  // Check if the table was successfully found and updated
+  if (!updatedTable) {
+    return res.status(404).json({ message: "Table not found" });
+  }
+
+  // Return the success response with the updated reservation and table
+  res.json({
+    message: "Reservation Cancelled and Table Available",
+    reservation: updateReservation,
+    table: updatedTable,
+  });
+});
+
 export {
   getReservations,
   createReservation,
+  cancelReservation,
   deleteReservation,
   updateReservation,
   getReservationById,

@@ -14,6 +14,9 @@ import {
   IconButton,
   Chip,
   Avatar,
+  FormControlLabel,
+  Checkbox,
+  FormHelperText,
 } from "@mui/material";
 import {
   CreditCard,
@@ -26,6 +29,7 @@ import {
   Phone,
   EventSeat,
   Restaurant,
+  Payment,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
@@ -42,6 +46,8 @@ const Checkout = () => {
     (state) => state.cart
   );
 
+  const navigate = useNavigate();
+
   console.log("user", userInfo);
   console.log(
     "booking",
@@ -54,10 +60,15 @@ const Checkout = () => {
 
   // Use the hooks from reservationSlice
   const [createReservation] = useCreateReservationMutation();
+  const [isChecked, setIsChecked] = useState(false);
 
   const CheckInDate = formatDate(bookingInformation.checkInDate);
   const CheckInTime = formatTime(bookingInformation.checkInTime);
   const CheckOutTime = formatTime(bookingInformation.checkOutTime);
+
+  const handleCheckboxChange = (event) => {
+    setIsChecked(event.target.checked);
+  };
 
   async function onToken(token) {
     const reservationDetails = {
@@ -84,7 +95,7 @@ const Checkout = () => {
       console.log("Reservation created:", response);
       if (response.data) {
         toast.success("Reservation created successfully");
-        
+        navigate("/bookings");
       } else {
         toast.error("Reservation creation failed");
       }
@@ -94,11 +105,7 @@ const Checkout = () => {
     }
   }
 
-  const handleSubmit = () => {
-    console.log("Cliked");
-  };
 
-  const navigate = useNavigate();
 
   // Mock data
   const tableInfo = {
@@ -211,6 +218,28 @@ const Checkout = () => {
                 </Grid>
               </Grid>
             </Box>
+            <Box sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isChecked}
+                    onChange={handleCheckboxChange}
+                    name="agree"
+                    color="primary"
+                  />
+                }
+                label={
+                  <Typography variant="body2">
+                    Pay And Confirm Your Booking
+                  </Typography>
+                }
+              />
+              {!isChecked && (
+                <FormHelperText error>
+                  You must agree to the terms and conditions.
+                </FormHelperText>
+              )}
+            </Box>
             <StripeCheckout
               name="Culinary Connect Booking"
               description={`Payment for Table No:${selectedTables.table_no}`}
@@ -218,17 +247,30 @@ const Checkout = () => {
               currency="USD"
               token={onToken}
               stripeKey="pk_test_51R6SjKARt0cv2wfi1su5am3VH4eaAwioaJkIpaNGVxRXTMn3xwygReuhQWr1VIU2NjEkRLqPtKCU3qS7znRoF73P00YWogZDJG"
-            />
-
-            <Button
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ mt: 2 }}
-              onClick={handleSubmit}
             >
-              Confirm Booking
-            </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={!isChecked}
+                sx={{
+                  fontWeight: "bold",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  p: 2,
+                  backgroundColor: "#424242", // Customize background color
+                  "&:hover": {
+                    backgroundColor: "#616161", // Hover effect
+                  },
+                  borderRadius: "8px",
+                }}
+                startIcon={<Payment sx={{ mr: 1 }} />}
+              >
+                Pay ${calculateTotal()}
+              </Button>
+            </StripeCheckout>
           </Paper>
         </Grid>
       </Grid>

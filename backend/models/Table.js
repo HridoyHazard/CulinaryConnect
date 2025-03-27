@@ -12,7 +12,7 @@ const tableSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Available", "Occupied", "Reserved"],
+      enum: ["Available", "Booked"],
       default: "Available",
     },
     picture: {
