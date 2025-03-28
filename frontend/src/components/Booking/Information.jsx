@@ -15,6 +15,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { bookingInformation } from "../../Slice/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Information = () => {
   const [name, setName] = useState("");
@@ -24,17 +25,24 @@ const Information = () => {
   const [checkOutTime, setCheckOutTime] = useState(null);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
+    const serializedCheckInDate = checkInDate ? checkInDate.toISOString() : null;
+    const serializedCheckInTime = checkInTime ? checkInTime.toISOString() : null;
+    const serializedCheckOutTime = checkOutTime ? checkOutTime.toISOString() : null;
+
     dispatch(
       bookingInformation({
         name,
         email,
-        checkInDate,
-        checkInTime,
-        checkOutTime,
+        checkInDate: serializedCheckInDate,
+        checkInTime: serializedCheckInTime,
+        checkOutTime: serializedCheckOutTime,
       })
     );
+
+    navigate("/tablebook");
   };
 
   const isFormValid = () => {

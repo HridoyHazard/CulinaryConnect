@@ -13,8 +13,16 @@
 .Auth input{
     width: 350px;
 }
-.Auth{
+.Auth {
     background-image: url(../assets/images/login.png);
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: 650px auto; 
+    background-position: left; 
+    min-height: 100vh;
 }
+
+@media (max-width: 650px) {
+    .Auth {
+      background-size: 100% auto; 
+    }
+  }

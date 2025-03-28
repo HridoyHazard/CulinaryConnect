@@ -1,10 +1,31 @@
 import { Button, Card, Rating, Typography } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { addToCart } from "../../Slice/cartSlice";
+import Swal from "sweetalert2";
 
 const MenuItem = ({ item }) => {
   const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const addToCartHandler = () => {
+    if (userInfo) {
+      dispatch(addToCart(item));
+    } else {
+      Swal.fire({
+        title: "Please login to add to cart",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Login",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/login";
+        }
+      });
+    }
+  };
 
   return (
     <Card
@@ -31,7 +52,11 @@ const MenuItem = ({ item }) => {
           objectFit: "cover", // Ensures the image scales properly
         }}
       />
-      <Typography component="div" variant="h6" sx={{ mt: 2, fontWeight: "bold" }}>
+      <Typography
+        component="div"
+        variant="h6"
+        sx={{ mt: 2, fontWeight: "bold" }}
+      >
         {item.name}
       </Typography>
       <Rating value={4.5} precision={0.5} size="small" sx={{ mt: 1 }} />
@@ -54,12 +79,12 @@ const MenuItem = ({ item }) => {
           mx: "auto", // Centers the button horizontally
           borderRadius: "8px",
           padding: "10px 0", // Padding for button size
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#f50057", // Change color on hover
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", // Add subtle shadow
           },
         }}
-        onClick={() => dispatch(addToCart(item))}
+        onClick={addToCartHandler}
       >
         Add to Cart
       </Button>

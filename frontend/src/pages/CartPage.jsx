@@ -16,18 +16,19 @@ import {
   Typography,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Add, DeleteOutline, Remove } from "@mui/icons-material";
 import { updateQuantity, removeFromCart } from "../Slice/cartSlice.js";
 
 const CartPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { cartItems } = useSelector((state) => state.cart);
 
   const handleIncrement = (itemId) => {
     console.log("Incrementing item", itemId);
     const item = cartItems.find((item) => item._id === itemId);
-    
+
     if (item) {
       dispatch(
         updateQuantity({
@@ -36,7 +37,6 @@ const CartPage = () => {
         })
       );
     }
-    console.log(item);
   };
 
   const handleDecrement = (itemId) => {
@@ -62,8 +62,12 @@ const CartPage = () => {
       .toFixed(2);
   };
 
+  const handleClick = () => {
+    navigate("/information");
+  };
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, minHeight: "100vh" }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
         Your Cart
       </Typography>
@@ -145,7 +149,6 @@ const CartPage = () => {
                       </TableCell>
                       <TableCell align="right">
                         <IconButton onClick={() => handleRemoveItem(item._id)}>
-
                           <DeleteOutline color="error" />
                         </IconButton>
                       </TableCell>
@@ -166,27 +169,20 @@ const CartPage = () => {
                 <Typography variant="body1">Subtotal:</Typography>
                 <Typography variant="body1">${calculateTotal()}</Typography>
               </Box>
-              <Box display="flex" justifyContent="space-between" mb={3}>
-                <Typography variant="body1">Tax (10%):</Typography>
-                <Typography variant="body1">
-                  ${(calculateTotal() * 0.1).toFixed(2)}
-                </Typography>
-              </Box>
+
               <Divider sx={{ my: 2 }} />
               <Box display="flex" justifyContent="space-between" mb={3}>
                 <Typography variant="h6">Total:</Typography>
-                <Typography variant="h6">
-                  ${(calculateTotal() * 1.1).toFixed(2)}
-                </Typography>
+                <Typography variant="h6">${calculateTotal()}</Typography>
               </Box>
               <Button
                 fullWidth
                 variant="contained"
                 color="primary"
                 size="large"
-                onClick={() => console.log("Proceed to checkout")}
+                onClick={handleClick}
               >
-                Proceed to Checkout
+                Proceed to Reservation
               </Button>
             </Paper>
           </Grid>

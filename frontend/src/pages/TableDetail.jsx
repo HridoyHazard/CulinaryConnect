@@ -9,7 +9,7 @@ import {
   useTheme,
 } from "@mui/material";
 import React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loading/Loading";
 import { useGetTableDetailsQuery } from "../Slice/tableSlice";
 import { styled } from "@mui/system";
@@ -57,6 +57,7 @@ const TableDetail = () => {
   const { id } = useParams();
   const { data: table, error, isLoading } = useGetTableDetailsQuery(id);
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   console.log(table);
@@ -71,6 +72,10 @@ const TableDetail = () => {
         </Typography>
       </DetailContainer>
     );
+
+    const handleClick = () => {
+      navigate(`/login?redirect=/information`);
+    }
 
   return (
     <DetailContainer maxWidth="lg">
@@ -148,8 +153,7 @@ const TableDetail = () => {
 
             {table.status === "Available" && (
               <Button
-                component={Link}
-                to="/information"
+                onClick={handleClick}
                 variant="contained"
                 color="primary"
                 size="large"

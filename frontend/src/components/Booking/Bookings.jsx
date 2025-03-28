@@ -20,15 +20,20 @@ import { toast } from "react-toastify";
 import {
   useGetReservationsQuery,
   useCancelReservationMutation,
+  useGetReservationByIdQuery,
 } from "../../Slice/reservationSlice"; // Ensure correct hooks
 import { formatDate, formatTime } from "../../utils/formatFunction";
+import Swal from "sweetalert2";
 
 const Bookings = () => {
-  const { data, isLoading, isError, error } = useGetReservationsQuery();
+  
+  const dispatch = useDispatch();
+   const { userInfo } = useSelector((state) => state.auth);
+
+   console.log("UserInfo", userInfo);
+  const { data, isLoading, isError, error } = useGetReservationByIdQuery(userInfo?.user?._id);
 
   const [cancelReservation] = useCancelReservationMutation();
-
-  console.log(data);
 
   // Handle loading and error states
   if (isLoading) {
@@ -50,17 +55,30 @@ const Bookings = () => {
   }
 
   const handleCancelBooking = async (bookingId) => {
-    try {
-      await cancelReservation(bookingId); 
-      toast.success(`Booking ${bookingId} canceled successfully!`);
-    } catch (error) {
-      toast.error(`Failed to cancel booking ${bookingId}`);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to cancel this booking?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, cancel it!",
+      cancelButtonText: "No, keep it",
+      reverseButtons: true,
+    });
+    if (result.isConfirmed) {
+      try {
+        await cancelReservation(bookingId);
+        toast.success(`Booking ${bookingId} canceled successfully!`);
+      } catch (error) {
+        toast.error(`Failed to cancel booking ${bookingId}`);
+      }
+    } else {
+      Swal.fire("Cancelled", "Your booking is safe :)", "info");
     }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mb: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4, minHeight: "100vh" }}>
+      <Typography className="first-title" variant="h4" sx={{ mb: 4 }}>
         Your Bookings
       </Typography>
       <Paper elevation={3} sx={{ p: 3 }}>

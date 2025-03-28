@@ -14,11 +14,11 @@ import { protect, admin } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 //// Reservation Routes
-router.route("/").get(getReservations);
-router.route("/").post(createReservation);
-router.route("/cancel/:id").put(cancelReservation);
-router.route("/user/:userId").get(getReservationsByUserId);
-router.route("/:id").get(getReservationById);
+router.route("/").get(protect, getReservations);
+router.route("/").post(protect, createReservation);
+router.route("/cancel/:id").put(protect, cancelReservation);
+router.route("/user/:userId").get(protect, getReservationsByUserId);
+router.route("/:id").get(protect, getReservationById);
 router.route("/:id").put(updateReservation);
 router.route("/:id").delete(deleteReservation);
 

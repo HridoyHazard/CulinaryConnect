@@ -13,7 +13,6 @@ import "./auth.css";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowForward } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import { Authenticate } from "./AuthContext";
 import { useLoginMutation } from "../Slice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../Slice/authSlice";
@@ -59,7 +58,6 @@ const Login = () => {
     formState: { errors },
   } = useForm();
   //auth function
-  const { setAuth } = useContext(Authenticate);
 
   const submitHandler = async (data) => {
     try {

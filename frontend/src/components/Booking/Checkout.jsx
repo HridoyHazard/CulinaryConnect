@@ -108,8 +108,6 @@ const Checkout = () => {
     }
   }
 
-
-
   // Mock data
   const tableInfo = {
     tableNumber: "T05",
@@ -129,7 +127,7 @@ const Checkout = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4, minHeight: "100vh" }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mb: 4 }}>
         Complete Your Booking
       </Typography>
@@ -164,22 +162,50 @@ const Checkout = () => {
               <Restaurant sx={{ mr: 1 }} /> Your Order
             </Typography>
             <List dense>
-              {cartItems.map((item, index) => (
-                <ListItem key={index} sx={{ py: 1 }}>
-                  <Avatar
-                    src={item.image} // Assuming 'image' is the property holding the image URL
-                    alt={item.name}
-                    sx={{ mr: 2, width: 40, height: 40 }}
-                  />
-                  <ListItemText
-                    primary={item.name}
-                    secondary={`Quantity: ${item.quantity}`}
-                  />
-                  <Typography>
-                    ${(item.price * item.quantity).toFixed(2)}
+              {cartItems.length === 0 ? (
+                <ListItem
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    py: 4,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{ mb: 2, color: "text.secondary" }}
+                  >
+                    No items in your order yet
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<LocalDining />}
+                    onClick={() => navigate("/menu")}
+                    sx={{ mt: 1 }}
+                  >
+                    Browse Menu Items
+                  </Button>
                 </ListItem>
-              ))}
+              ) : (
+                cartItems.map((item, index) => (
+                  <ListItem key={index} sx={{ py: 1 }}>
+                    <Avatar
+                      src={item.image}
+                      alt={item.name}
+                      sx={{ mr: 2, width: 40, height: 40 }}
+                    />
+                    <ListItemText
+                      primary={item.name}
+                      secondary={`Quantity: ${item.quantity}`}
+                    />
+                    <Typography>
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </Typography>
+                  </ListItem>
+                ))
+              )}
             </List>
           </Paper>
         </Grid>

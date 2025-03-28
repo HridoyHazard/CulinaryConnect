@@ -20,8 +20,9 @@ import "./nav.css";
 import { useLogoutMutation } from "../../Slice/userSlice";
 import { logout } from "../../Slice/authSlice";
 import { useSelector, useDispatch } from "react-redux";
-import { AccountCircleRounded, ExitToApp } from "@mui/icons-material";
+import { clearCartItems } from "../../Slice/cartSlice";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import { Payment } from "@mui/icons-material";
 
 export default function NavBar() {
   const dispatch = useDispatch();
@@ -32,11 +33,7 @@ export default function NavBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [userAnchorEl, setUserAnchorEl] = React.useState(null);
   const { userInfo } = useSelector((state) => state.auth);
-  const { cartItems } = useSelector((state) => state.cart);
-
-  console.log(cartItems);
-
-  console.log(userInfo);
+  const { cartItems, selectedTables } = useSelector((state) => state.cart);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -68,6 +65,7 @@ export default function NavBar() {
     try {
       await logoutApiCall().unwrap();
       dispatch(logout());
+      dispatch(clearCartItems());
       navigate("/login");
     } catch (err) {
       console.error(err);
@@ -91,13 +89,9 @@ export default function NavBar() {
           >
             Culinary Connect
           </Typography>
-          <IconButton
-            component={Link}
-            to="/cart"
-            size="large"
-            color="error"
-          >
-            <Badge 
+          {userInfo && (
+          <IconButton component={Link} to="/cart" size="large" color="error">
+            <Badge
               badgeContent={cartItems.length}
               color="error"
               overlap="circular"
@@ -105,6 +99,7 @@ export default function NavBar() {
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
+          )}
           <div>
             <IconButton
               size="large"
@@ -223,11 +218,21 @@ export default function NavBar() {
                   <Button startIcon={<TocIcon />}>Tables</Button>
                 </MenuItem>
               </Link>
-              <Link to="/booking">
+              {userInfo && (
+                <Link to="/bookings">
                 <MenuItem onClick={handleClose}>
                   <Button startIcon={<BookOnlineIcon />}>Bookings</Button>
                 </MenuItem>
               </Link>
+              )}
+              {selectedTables?.table_no && (
+                <Link to="/checkout">
+                <MenuItem onClick={handleClose}>
+                  <Button startIcon={<Payment />}>Checkout</Button>
+                </MenuItem>
+              </Link>
+              )}
+              
               {!userInfo && (
                 <Link to="/login">
                   <MenuItem onClick={handleClose}>
