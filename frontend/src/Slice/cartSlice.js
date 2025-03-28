@@ -61,6 +61,11 @@ const cartSlice = createSlice({
     },
     clearCartItems: (state, action) => {
       state.cartItems = [];
+      state.cartItems = [];
+      state.bookingInformation = {};
+      state.selectedTables = [];
+      state.paymentMethod = "";
+
       return updateCart(state);
     },
   },

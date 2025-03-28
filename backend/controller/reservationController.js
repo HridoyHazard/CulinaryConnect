@@ -104,6 +104,22 @@ const getReservationById = asyncHandler(async (req, res) => {
   res.json(reservation);
 });
 
+// @desc    Get reservations by User ID
+// @route   GET /api/reservations/user/:userId
+// @access  Private/User (Only logged-in users can access their own reservations)
+const getReservationsByUserId = asyncHandler(async (req, res) => {
+  // Fetch reservations where the userId matches the logged-in user
+  const reservations = await Reservation.find({ userId: req.params.userId });
+
+  // If no reservations are found
+  if (!reservations || reservations.length === 0) {
+    return res.status(404).json({ message: "No reservations found for this user" });
+  }
+
+  // Return the reservations
+  res.json(reservations);
+});
+
 // @desc    Update reservation
 // @route   PUT /api/reservations/:id
 // @access  Private/Admin
@@ -176,4 +192,5 @@ export {
   deleteReservation,
   updateReservation,
   getReservationById,
+  getReservationsByUserId,
 };

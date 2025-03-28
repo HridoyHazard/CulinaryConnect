@@ -38,6 +38,7 @@ import { Box } from "@mui/system";
 import StripeCheckout from "react-stripe-checkout";
 import { useDispatch, useSelector } from "react-redux";
 import { formatDate, formatTime } from "../../utils/formatFunction";
+import { clearCartItems } from "../../Slice/cartSlice";
 import { useCreateReservationMutation } from "../../Slice/reservationSlice";
 
 const Checkout = () => {
@@ -47,6 +48,8 @@ const Checkout = () => {
   );
 
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   console.log("user", userInfo);
   console.log(
@@ -92,9 +95,9 @@ const Checkout = () => {
 
     try {
       const response = await createReservation(reservationDetails);
-      console.log("Reservation created:", response);
       if (response.data) {
         toast.success("Reservation created successfully");
+        dispatch(clearCartItems());
         navigate("/bookings");
       } else {
         toast.error("Reservation creation failed");

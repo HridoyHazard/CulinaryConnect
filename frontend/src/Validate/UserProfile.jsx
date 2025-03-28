@@ -19,6 +19,8 @@ import { useProfileMutation } from "../Slice/userSlice";
 import { setCredentials } from "../Slice/authSlice";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import EventIcon from "@mui/icons-material/Event";
+import { useGetReservationByIdQuery } from "../Slice/reservationSlice";
+import { formatDate, formatTime } from "../utils/formatFunction";
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -26,6 +28,8 @@ const UserProfile = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
   const { userInfo } = useSelector((state) => state.auth);
+
+  console.log(userInfo);
 
   const {
     register,
@@ -42,39 +46,16 @@ const UserProfile = () => {
   });
 
   const [updateProfile, { isLoading: isUpdating }] = useProfileMutation();
-  const [bookings, setBookings] = useState([]);
+
+  const { data: reservationData } = useGetReservationByIdQuery(
+    userInfo?.user?._id
+  );
 
   // Mock bookings data - replace with actual API call
   useEffect(() => {
     if (watch("password") !== watch("confirmPassword")) {
       trigger("confirmPassword");
     }
-
-    const fetchBookings = async () => {
-      try {
-        // const response = await fetchUserBookings();
-        // setBookings(response.data);
-        const mockBookings = [
-          {
-            id: 1,
-            date: "2023-10-01",
-            service: "Spa Treatment",
-            status: "Completed",
-          },
-          {
-            id: 2,
-            date: "2023-10-05",
-            service: "Haircut",
-            status: "Confirmed",
-          },
-          { id: 3, date: "2023-10-10", service: "Massage", status: "Pending" },
-        ];
-        setBookings(mockBookings);
-      } catch (error) {
-        toast.error("Failed to load bookings");
-      }
-    };
-    fetchBookings();
   }, [watch("password"), trigger, watch]);
 
   const submitProfileHandler = async (data) => {
@@ -90,8 +71,8 @@ const UserProfile = () => {
       reset({
         name: data.name,
         email: data.email,
-        password: "", 
-        confirmPassword: "", 
+        password: "",
+        confirmPassword: "",
       });
 
       toast.success("Profile updated successfully");
@@ -221,45 +202,200 @@ const UserProfile = () => {
 
         {/* Bookings Section */}
         <Grid item xs={12}>
-          <Card sx={{ p: 3 }}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.05)",
+              background: theme.palette.background.paper,
+            }}
+          >
             <Typography
               variant="h5"
               gutterBottom
-              sx={{ mb: 3, display: "flex", alignItems: "center" }}
+              sx={{
+                mb: 3,
+                display: "flex",
+                alignItems: "center",
+                color: theme.palette.text.primary,
+                fontWeight: 600,
+              }}
             >
-              <EventIcon sx={{ mr: 1 }} /> My Bookings
+              <EventIcon sx={{ mr: 1, color: theme.palette.primary.main }} /> My
+              Bookings
             </Typography>
+
             <Grid container spacing={2}>
-              {bookings.map((booking) => (
+              {reservationData?.map((booking) => (
                 <Grid item xs={12} sm={6} lg={4} key={booking.id}>
-                  <Card sx={{ p: 2, bgcolor: "background.paper" }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>{booking.service}</strong>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Date: {booking.date}
-                    </Typography>
-                    <Typography
-                      variant="body2"
+                  <Card
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: theme.shadows[4],
+                      },
+                    }}
+                  >
+                    <Box sx={{ mb: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 700,
+                          color: theme.palette.primary.main,
+                          fontSize: "1.1rem",
+                        }}
+                      >
+                        Table #{booking.table_no}
+                      </Typography>
+                    </Box>
+
+                    <Grid container spacing={1} sx={{ mb: 1 }}>
+                      <Grid item xs={6}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: theme.palette.text.secondary }}
+                        >
+                          🗓️ {formatDate(booking.check_in_date)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: theme.palette.text.secondary }}
+                        >
+                          🕒 {formatTime(booking.check_in_time)}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: theme.palette.text.secondary }}
+                        >
+                          🏁 {formatTime(booking.check_out_time)}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    <Box
                       sx={{
-                        color:
-                          booking.status === "Confirmed"
-                            ? "success.main"
-                            : booking.status === "Pending"
-                            ? "warning.main"
-                            : "text.secondary",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1,
                       }}
                     >
-                      Status: {booking.status}
-                    </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: theme.palette.text.primary }}
+                      >
+                        👥 {booking.capacity} People
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.success.dark,
+                        }}
+                      >
+                        ${booking.totalAmount}
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        borderTop: `1px solid ${theme.palette.divider}`,
+                        pt: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          color: theme.palette.text.secondary,
+                          mb: 0.5,
+                        }}
+                      >
+                        Menu Items:
+                      </Typography>
+                      {booking.itemsMenu.map((item) => (
+                        <Box
+                          key={item.name}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            "&:not(:last-child)": { mb: 0.5 },
+                          }}
+                        >
+                          <span>• {item.name}</span>
+                          <span>x{item.quantity}</span>
+                        </Box>
+                      ))}
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        mt: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1,
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          backgroundColor:
+                            booking.status === "Confirmed"
+                              ? theme.palette.success.light
+                              : booking.status === "Cancelled"
+                              ? theme.palette.error.light
+                              : theme.palette.grey[300],
+                          color:
+                            booking.status === "Confirmed"
+                              ? theme.palette.success.contrastText
+                              : booking.status === "Cancelled"
+                              ? theme.palette.error.contrastText
+                              : theme.palette.grey[800],
+                        }}
+                      >
+                        {booking.status}
+                      </Box>
+                    </Box>
                   </Card>
                 </Grid>
               ))}
             </Grid>
-            {bookings.length === 0 && (
-              <Typography variant="body1" sx={{ textAlign: "center", p: 3 }}>
-                No bookings found
-              </Typography>
+
+            {reservationData?.length === 0 && (
+              <Box
+                sx={{
+                  textAlign: "center",
+                  p: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <EventIcon
+                  sx={{
+                    fontSize: 40,
+                    color: theme.palette.text.disabled,
+                    mb: 1,
+                  }}
+                />
+                <Typography
+                  variant="body1"
+                  sx={{ color: theme.palette.text.secondary }}
+                >
+                  No bookings found
+                </Typography>
+              </Box>
             )}
           </Card>
         </Grid>

@@ -23,6 +23,11 @@ export const reservationSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Reservation"],
     }),
+    getReservationById: builder.query({
+      query: (id) => `${RESERVATIONS_URL}/user/${id}`,
+      providesTags: ["Reservation"],
+      keepUnusedDataFor: 5,
+    })
   }),
 });
 
@@ -30,4 +35,5 @@ export const {
   useGetReservationsQuery,
   useCreateReservationMutation,
   useCancelReservationMutation,
+  useGetReservationByIdQuery
 } = reservationSlice;

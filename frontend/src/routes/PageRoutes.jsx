@@ -1,25 +1,28 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
-import HomePage from '../pages/HomePage'
 import Loader from '../components/Loading/Loading'
-import Login from '../Validate/Login'
-import Register from '../Validate/Register'
-import Logout from '../Validate/Logout'
-import UserProfile from '../Validate/UserProfile'
-import CartPage from '../pages/CartPage'
-import Information from '../components/Booking/Information'
-import TableBook from '../components/Booking/TableBook'
-import Checkout from '../components/Booking/Checkout'
-import Bookings from '../components/Booking/Bookings'
 
 
-// Lasy load to import the Pages
-const Menu =React.lazy(()=>import('../pages/MenuPage'))
-const Booking =React.lazy(()=>import('../pages/BookingPage'))
-const Orders =React.lazy(()=>import('../pages/Orders'))
-const OrderDetail =React.lazy(()=>import('../pages/OrderDetail'))
-const Table =React.lazy(()=>import('../pages/TablePage'))
-const TableDetail =React.lazy(()=>import('../pages/TableDetail'))
+// Lazy loaded pages
+const HomePage = React.lazy(() => import('../pages/HomePage'))
+const Menu = React.lazy(() => import('../pages/MenuPage'))
+const Orders = React.lazy(() => import('../pages/Orders'))
+const OrderDetail = React.lazy(() => import('../pages/OrderDetail'))
+const Table = React.lazy(() => import('../pages/TablePage'))
+const TableDetail = React.lazy(() => import('../pages/TableDetail'))
+const CartPage = React.lazy(() => import('../pages/CartPage'))
+
+// Lazy loaded auth & profile
+const Login = React.lazy(() => import('../Validate/Login'))
+const Register = React.lazy(() => import('../Validate/Register'))
+const Logout = React.lazy(() => import('../Validate/Logout'))
+const UserProfile = React.lazy(() => import('../Validate/UserProfile'))
+
+// Lazy loaded booking components
+const Information = React.lazy(() => import('../components/Booking/Information'))
+const TableBook = React.lazy(() => import('../components/Booking/TableBook'))
+const Checkout = React.lazy(() => import('../components/Booking/Checkout'))
+const Bookings = React.lazy(() => import('../components/Booking/Bookings'))
 
 
 const PageRoutes = () => {
@@ -32,7 +35,7 @@ const PageRoutes = () => {
       {/* Menu Page*/}
       <Route path='menu' element={<Menu/>} />
       {/* Booking Page*/}
-      <Route path='booking' element={<Booking/>} />
+
       {/* Order Page*/}
       <Route path='orders' element={<Orders/>} />
       <Route path='orders/:id' element={<OrderDetail/>} />
