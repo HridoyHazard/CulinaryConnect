@@ -14,10 +14,10 @@ const getTables = asyncHandler(async (req, res) => {
 // @route   POST /api/tables
 // @access  Private/Admin
 const createTable = asyncHandler(async (req, res) => {
-  const { id, table_no, seating_capacity, status, picture } = req.body;
+  const { table_no, seating_capacity, status, picture } = req.body;
+  console.log(table_no, seating_capacity, status, picture);
   try {
     const newTable = new Table({
-      id,
       table_no,
       seating_capacity,
       status,

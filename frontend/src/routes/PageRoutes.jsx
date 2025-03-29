@@ -17,6 +17,7 @@ const Login = React.lazy(() => import('../Validate/Login'))
 const Register = React.lazy(() => import('../Validate/Register'))
 const Logout = React.lazy(() => import('../Validate/Logout'))
 const UserProfile = React.lazy(() => import('../Validate/UserProfile'))
+const AdminUserProfile = React.lazy(() => import('../pages/AdminUserProfile'))
 
 // Lazy loaded booking components
 const Information = React.lazy(() => import('../components/Booking/Information'))
@@ -50,6 +51,7 @@ const PageRoutes = () => {
 
       {/* User Profile Page*/}
       <Route path='profile' element={<UserProfile/>} />
+      <Route path='adminprofile' element={<AdminUserProfile/>} />
 
       {/* Cart Page*/}
       <Route path='cart' element={<CartPage/>} />

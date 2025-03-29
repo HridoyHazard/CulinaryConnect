@@ -19,17 +19,6 @@ const tableSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    reservation: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reservation",
-    },
-    orders: [
-      {
-        item_name: String,
-        quantity: Number,
-        price: Number,
-      },
-    ],
   },
   { timestamps: true }
 );

@@ -1,0 +1,471 @@
+import React, { useState } from "react";
+import {
+  Container,
+  Typography,
+  Grid,
+  Card,
+  Box,
+  Button,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  Restaurant as RestaurantIcon,
+  TableRestaurant as TableIcon,
+  BookOnline as ReservationIcon,
+  Dashboard as DashboardIcon,
+} from "@mui/icons-material";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
+import {
+  useGetTablesQuery,
+  useUpdateTableMutation,
+  useDeleteTableMutation,
+  useCreateTableMutation,
+} from "../Slice/tableSlice";
+import { useGetMenuQuery } from "../Slice/menuSlice";
+import { useGetReservationsQuery } from "../Slice/reservationSlice";
+import { formatDate, formatTime } from "../utils/formatFunction";
+import { uploadImage } from "../utils/uploadImage";
+import Swal from "sweetalert2";
+
+const AdminUserProfile = () => {
+  const [currentTab, setCurrentTab] = useState("dashboard");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [dialogType, setDialogType] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { data: tables } = useGetTablesQuery();
+  const { data: menu } = useGetMenuQuery();
+  const { data: reservations } = useGetReservationsQuery();
+  const [updateTable] = useUpdateTableMutation();
+  const [deleteTable] = useDeleteTableMutation();
+  const [createTable] = useCreateTableMutation();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
+  const handleOpenDialog = (type, item = null) => {
+    console.log(item);
+    setDialogType(type);
+    setSelectedItem(item);
+    reset(item || {});
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedItem(null);
+    reset();
+  };
+
+  const handleDelete = (type, id) => {
+    switch (type) {
+      case "table":
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            deleteTable(id)
+              .then(() => {
+                toast.success("Table deleted successfully");
+                Swal.fire(
+                  "Deleted!",
+                  "Your table has been deleted.",
+                  "success"
+                );
+              })
+              .catch((err) => {
+                toast.error("Failed to delete table");
+                Swal.fire(
+                  "Error!",
+                  "There was an issue deleting the table.",
+                  "error"
+                );
+              });
+          }
+        });
+        break;
+      case "menu":
+        break;
+    }
+  };
+
+  const onSubmit = async (data) => {
+    if (data.image && data.image.length > 0) {
+      setLoading(true);
+      try {
+        const picture = await uploadImage(data.image[0]);
+        if (picture) {
+          data.picture = picture; // Add new image URL to form data
+        }
+      } catch (error) {
+        toast.error("Image upload failed");
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
+    }
+    try {
+      switch (dialogType) {
+        case "table":
+          if (selectedItem) {
+            await updateTable({
+              ...data,
+              id: selectedItem._id,
+            });
+            toast.success("Table updated successfully");
+          } else {
+            await createTable({ ...data, id: uuidv4() });
+            toast.success("Table created successfully");
+          }
+          break;
+      }
+      handleCloseDialog();
+    } catch (err) {
+      toast.error("Operation failed");
+    }
+  };
+
+  const handleStatusChange = (reservationId, status) => {
+    //   setReservations(reservations.map(res =>
+    //     res.id === reservationId ? { ...res, status } : res
+    //   ));
+    //   toast.success("Reservation status updated");
+  };
+
+  return (
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4, minHeight: "100vh" }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+        Admin Dashboard
+      </Typography>
+
+      <Tabs value={currentTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+        <Tab value="dashboard" label="Dashboard" icon={<DashboardIcon />} />
+        <Tab value="tables" label="Tables" icon={<TableIcon />} />
+        <Tab value="menu" label="Menu" icon={<RestaurantIcon />} />
+        <Tab
+          value="reservations"
+          label="Reservations"
+          icon={<ReservationIcon />}
+        />
+      </Tabs>
+
+      {currentTab === "dashboard" && (
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="h6">Total Tables</Typography>
+              <Typography variant="h4">{tables?.length}</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="h6">Total Menu Items</Typography>
+              <Typography variant="h4">{menu?.length}</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="h6">Active Reservations</Typography>
+              <Typography variant="h4">
+                {reservations?.filter((r) => r.status === "Confirmed").length}
+              </Typography>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
+
+      {currentTab === "tables" && (
+        <Card sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenDialog("table")}
+            >
+              Add Table
+            </Button>
+          </Box>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Table Number</TableCell>
+                  <TableCell>Capacity</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tables?.map((table) => (
+                  <TableRow key={table._id}>
+                    <TableCell>{table.table_no}</TableCell>
+                    <TableCell>{table.seating_capacity}</TableCell>
+                    <TableCell>{table.status}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() => handleOpenDialog("table", table)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDelete("table", table._id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      {currentTab === "menu" && (
+        <Card sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenDialog("menu")}
+            >
+              Add Menu Item
+            </Button>
+          </Box>
+          <Grid container spacing={3}>
+            {menu?.map((item) => (
+              <Grid item xs={12} sm={6} md={4} key={item._id}>
+                <Card sx={{ p: 2 }}>
+                  <Typography variant="h6">{item.name}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {item.description}
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 1 }}>
+                    ${item.price}
+                  </Typography>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}
+                  >
+                    <IconButton onClick={() => handleOpenDialog("menu", item)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete("menu", item._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Card>
+      )}
+
+      {currentTab === "reservations" && (
+        <Card sx={{ p: 3 }}>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>User</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>In Time</TableCell>
+                  <TableCell>Out Time</TableCell>
+                  <TableCell>Table</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {reservations?.map((reservation) => (
+                  <TableRow key={reservation._id}>
+                    <TableCell>{reservation.customer_name}</TableCell>
+                    <TableCell>
+                      {formatDate(reservation.check_in_date)}
+                    </TableCell>
+                    <TableCell>
+                      {formatTime(reservation.check_in_time)}
+                    </TableCell>
+                    <TableCell>
+                      {formatTime(reservation.check_out_time)}
+                    </TableCell>
+                    <TableCell>{reservation.table_no}</TableCell>
+                    <TableCell>
+                      <select
+                        value={reservation.status}
+                        onChange={(e) =>
+                          handleStatusChange(reservation._id, e.target.value)
+                        }
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() =>
+                          handleDelete("reservation", reservation._id)
+                        }
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>
+          {selectedItem ? "Edit" : "Create"} {dialogType}
+        </DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {dialogType === "table" && (
+              <>
+                <TextField
+                  {...register("table_no", { required: true })}
+                  label="Table Number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.table_no}
+                  helperText={errors.table_no && "Table number is required"}
+                />
+                <TextField
+                  {...register("seating_capacity", { required: true, min: 1 })}
+                  label="Capacity"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.seating_capacity}
+                  helperText={errors.seating_capacity && "Capacity is required"}
+                />
+                <TextField
+                  {...register("status", { required: true })}
+                  label="Status"
+                  select
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.status}
+                  helperText={errors.status && "Status is required"}
+                  defaultValue={selectedItem?.status || ""}
+                >
+                  <MenuItem value="Available">Available</MenuItem>
+                  <MenuItem value="Booked">Booked</MenuItem>
+                </TextField>
+                <Box sx={{ mt: 2 }}>
+                  <input
+                    {...register("image", { required: false })}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload">
+                    <Button variant="contained" component="span">
+                      Upload Image
+                    </Button>
+                  </label>
+                  {loading && <CircularProgress sx={{ ml: 2 }} size={24} />}
+                </Box>
+              </>
+            )}
+
+            {dialogType === "menu" && (
+              <>
+                <TextField
+                  {...register("name", { required: true })}
+                  label="Item Name"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.name}
+                  helperText={errors.name && "Name is required"}
+                />
+                <TextField
+                  {...register("description", { required: true })}
+                  label="Description"
+                  fullWidth
+                  margin="normal"
+                  multiline
+                  rows={3}
+                  error={!!errors.description}
+                  helperText={errors.description && "Description is required"}
+                />
+                <TextField
+                  {...register("price", { required: true, min: 0 })}
+                  label="Price"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.price}
+                  helperText={errors.price && "Valid price is required"}
+                />
+                <TextField
+                  {...register("category", { required: true })}
+                  label="Category"
+                  select
+                  fullWidth
+                  margin="normal"
+                >
+                  <MenuItem value="Appetizer">Appetizer</MenuItem>
+                  <MenuItem value="Main Course">Main Course</MenuItem>
+                  <MenuItem value="Dessert">Dessert</MenuItem>
+                  <MenuItem value="Beverage">Beverage</MenuItem>
+                </TextField>
+              </>
+            )}
+
+            <DialogActions sx={{ mt: 2 }}>
+              <Button onClick={handleCloseDialog}>Cancel</Button>
+              <Button type="submit" variant="contained">
+                {selectedItem ? "Update" : "Create"}
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Container>
+  );
+};
+
+export default AdminUserProfile;

@@ -90,15 +90,15 @@ export default function NavBar() {
             Culinary Connect
           </Typography>
           {userInfo && (
-          <IconButton component={Link} to="/cart" size="large" color="error">
-            <Badge
-              badgeContent={cartItems.length}
-              color="error"
-              overlap="circular"
-            >
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
+            <IconButton component={Link} to="/cart" size="large" color="error">
+              <Badge
+                badgeContent={cartItems.length}
+                color="error"
+                overlap="circular"
+              >
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
           )}
           <div>
             <IconButton
@@ -168,7 +168,12 @@ export default function NavBar() {
                 >
                   <MenuItem
                     onClick={() => {
-                      navigate("/profile");
+                 
+                      if (userInfo?.user?.isAdmin === true) {
+                        navigate("/adminprofile");
+                      } else {
+                        navigate("/profile");
+                      }
                       handleCloseUserMenu();
                     }}
                     sx={{ py: 1.5 }}
@@ -220,19 +225,19 @@ export default function NavBar() {
               </Link>
               {userInfo && (
                 <Link to="/bookings">
-                <MenuItem onClick={handleClose}>
-                  <Button startIcon={<BookOnlineIcon />}>Bookings</Button>
-                </MenuItem>
-              </Link>
+                  <MenuItem onClick={handleClose}>
+                    <Button startIcon={<BookOnlineIcon />}>Bookings</Button>
+                  </MenuItem>
+                </Link>
               )}
               {selectedTables?.table_no && (
                 <Link to="/checkout">
-                <MenuItem onClick={handleClose}>
-                  <Button startIcon={<Payment />}>Checkout</Button>
-                </MenuItem>
-              </Link>
+                  <MenuItem onClick={handleClose}>
+                    <Button startIcon={<Payment />}>Checkout</Button>
+                  </MenuItem>
+                </Link>
               )}
-              
+
               {!userInfo && (
                 <Link to="/login">
                   <MenuItem onClick={handleClose}>
