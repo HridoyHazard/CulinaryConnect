@@ -1,73 +1,79 @@
 import asyncHandler from "../middleware/asyncHandler.js";
-import Category from "../models/Category.js";
+import Item from "../models/Items.js";
 
-// @desc    Get all categories
-// @route   GET /api/categories
-// @access  Public
-const getCategories = asyncHandler(async (req, res) => {
-  const categories = await Category.find({});
-  res.json(categories);
-});
-
-// @desc    Get single category
-// @route   GET /api/categories/:id
-// @access  Public
-const getCategoryBySection = asyncHandler(async (req, res) => {
-  const { section_name } = req.params;
-
-  const category = await Category.findOne({ section_name });
-  if (!category) {
-    res.status(404);
-    throw new Error("Category not found");
-  }
-  res.json(category);
-});
-
-// @desc    Create category
-// @route   POST /api/categories
+// @desc    Get all menu
+// @route   GET /api/menus
 // @access  Private/Admin
-const createCategory = asyncHandler(async (req, res) => {
-  const { section_name, items } = req.body;
 
+const getMenu = asyncHandler(async (req, res) => {
+  const menu = await Item.find({});
+  res.json(menu);
+});
+
+// @desc    Get menu by Category
+// @route   GET /api/menus/:category
+// @access  Private/Admin
+
+const getMenuByCategory = asyncHandler(async (req, res) => {
+  const menu = await Item.find({ category: req.params.category });
+  res.json(menu);
+});
+
+// @desc    Create Menu
+// @route   POST /api/menus
+// @access  Private/Admin
+
+const createMenu = asyncHandler(async (req, res) => {
+  const { name, description, price, picture, quantity, category } = req.body;
   try {
-    const existingCategory = await Category.findOne({ section_name });
-    if (existingCategory) {
-      return res.status(400).json({ message: "Category already exists." });
-    }
-
-    const category = new Category({
-      section_name,
-      items,
+    const newMenu = new Item({
+      name,
+      description,
+      price,
+      picture,
+      quantity,
+      category,
     });
-
-    await category.save();
-    res.status(201).json(category);
+    await newMenu.save();
+    res.status(201).json(newMenu);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
-// @desc    Update category by adding items
-// @route   PATCH /api/categories/:id
+
+// @desc    Update Menu
+// @route   PUT /api/menus/:id
 // @access  Private/Admin
-const updateCategory = asyncHandler(async (req, res) => {
-  const sectionName = req.params.section_name;
 
-  const { items } = req.body; // Expecting an array of new items
+const updateMenu = asyncHandler(async (req, res) => {
+  const menu = await Item.findById(req.params.id);
+  if (menu) {
+    menu.name = req.body.name || menu.name;
+    menu.description = req.body.description || menu.description;
+    menu.price = req.body.price || menu.price;
+    menu.picture = req.body.picture || menu.picture;
+    menu.quantity = req.body.quantity || menu.quantity;
+    menu.category = req.body.category || menu.category;
 
-  const category = await Category.findOne({ section_name: sectionName });
-
-  if (category) {
-    // If itemsToAdd is provided and is an array, append the new items
-    if (items && Array.isArray(items)) {
-      category.items.push(...items);
-      await category.save();
-      res.json(category);
-    } else {
-      res.status(400).json({ message: "Invalid items data" });
-    }
+    const updatedMenu = await menu.save();
+    res.json(updatedMenu);
   } else {
-    res.status(404).json({ message: "Category not found" });
+    res.status(404);
+    throw new Error("Menu not found");
   }
 });
 
-export { getCategories, getCategoryBySection, createCategory, updateCategory };
+// @desc    Delete menu by ID
+// @route   DELETE /api/menus/:id
+// @access  Private/Admin
+
+const deleteMenu = asyncHandler(async (req, res) => {
+  const menu = await Item.findByIdAndDelete(req.params.id);
+  if (!menu) {
+    res.status(404);
+    throw new Error("Menu not found");
+  }
+  res.json({ message: "Menu removed" });
+});
+
+export { getMenu, getMenuByCategory, updateMenu, deleteMenu, createMenu };

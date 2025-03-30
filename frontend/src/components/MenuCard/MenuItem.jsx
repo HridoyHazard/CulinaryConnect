@@ -42,7 +42,7 @@ const MenuItem = ({ item }) => {
       className="MenuSingleCard"
     >
       <img
-        src={item.image}
+        src={item.picture}
         alt={item.name}
         loading="lazy"
         style={{

@@ -1,19 +1,36 @@
 import { Box, Typography, Container } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import MenuItem from "../components/MenuCard/MenuItem";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "../assets/carouselStyles.css";
 import { useGetMenuQuery } from "../Slice/menuSlice";
+
 const MenuPage = () => {
-  const { data: Menu, error, isLoading } = useGetMenuQuery();
+  const { data: menuData, error, isLoading } = useGetMenuQuery();
+  const [sliderKey, setSliderKey] = useState(0);
+  const [groupedData, setGroupedData] = useState({});
+
+  useEffect(() => {
+    if (menuData) {
+      const grouped = menuData.reduce((acc, item) => {
+        const category = item.category;
+        acc[category] = acc[category] || [];
+        acc[category].push(item);
+        return acc;
+      }, {});
+      setGroupedData(grouped);
+      // Force slider remount when data is loaded
+      setSliderKey((prev) => prev + 1);
+    }
+  }, [menuData]);
 
   const sliderSettings = {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 3, // Default number of cards shown
+    slidesToShow: 3,
     slidesToScroll: 1,
     initialSlide: 0,
     responsive: [
@@ -48,35 +65,40 @@ const MenuPage = () => {
       <Typography className="second-title" variant="h4">
         Discover Our Flavorful Symphony!
       </Typography>
-      {
-        // Home Page Menu Mapping
-        Menu?.length ? (
-          Menu.map((item, index) => {
-            return (
-              <Container key={index} sx={{ padding: 2 }}>
-                <Typography component="div" variant="h5" sx={{ padding: 2 }}>
-                  {item.section_name}
-                </Typography>
-                {item.items && item.items.length > 0 ? (
-                  <Slider {...sliderSettings}>
-                    {item.items.map((menuItem, itemIndex) => (
-                      <div key={itemIndex} style={{ padding: "0 10px" }}>
-                        <MenuItem item={menuItem} />
-                      </div>
-                    ))}
-                  </Slider>
-                ) : (
-                  <Typography component="p">
-                    No items in this section
-                  </Typography>
-                )}
-              </Container>
-            );
-          })
-        ) : (
-          <Typography component="p"> No Items</Typography>
-        )
-      }
+
+      {Object.keys(groupedData).map((category) => (
+        <Container
+          key={category}
+          maxWidth={false} // Remove max-width constraint
+          sx={{
+            padding: 2,
+            "& .slick-slide": {
+              padding: "0 10px",
+              boxSizing: "border-box",
+            },
+            "& .slick-list": {
+              margin: "0 -10px",
+            },
+          }}
+        >
+          <Typography component="div" variant="h5" sx={{ padding: 2 }}>
+            {category}
+          </Typography>
+
+          {groupedData[category].length > 0 ? (
+            // Key now updates when data loads
+            <Slider {...sliderSettings} key={`${category}-${sliderKey}`}>
+              {groupedData[category].map((menuItem, index) => (
+                <div key={index} style={{ padding: "0 10px" }}>
+                  <MenuItem item={menuItem} />
+                </div>
+              ))}
+            </Slider>
+          ) : (
+            <Typography component="p">No items in this section</Typography>
+          )}
+        </Container>
+      ))}
     </Box>
   );
 };

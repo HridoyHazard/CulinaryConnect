@@ -27,7 +27,14 @@ export const reservationSlice = apiSlice.injectEndpoints({
       query: (id) => `${RESERVATIONS_URL}/user/${id}`,
       providesTags: ["Reservation"],
       keepUnusedDataFor: 5,
-    })
+    }),
+    deleteReservation: builder.mutation({
+      query: (id) => ({
+        url: `${RESERVATIONS_URL}/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Reservation"],
+    }),
   }),
 });
 
@@ -35,5 +42,6 @@ export const {
   useGetReservationsQuery,
   useCreateReservationMutation,
   useCancelReservationMutation,
-  useGetReservationByIdQuery
+  useGetReservationByIdQuery,
+  useDeleteReservationMutation,
 } = reservationSlice;

@@ -1,12 +1,11 @@
 import express from "express";
-import { getCategories, getCategoryBySection, createCategory, updateCategory } from "../controller/menuController.js";
+import { getMenu , getMenuByCategory, updateMenu, deleteMenu, createMenu } from "../controller/menuController.js";
 
 const router = express.Router();
 
-router.route("/").get(getCategories);
-router.route("/:section_name").get(getCategoryBySection);
-router.route("/:section_name").put(updateCategory);
-router.route("/").post(createCategory);
-
+router.route("/").get(getMenu).post(createMenu);
+router.route("/:category").get(getMenuByCategory);
+router.route("/:id").put(updateMenu);
+router.route("/:id").delete(deleteMenu);
 
 export default router;

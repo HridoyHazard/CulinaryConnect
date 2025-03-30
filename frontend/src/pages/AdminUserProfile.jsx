@@ -43,8 +43,13 @@ import {
   useDeleteTableMutation,
   useCreateTableMutation,
 } from "../Slice/tableSlice";
-import { useGetMenuQuery } from "../Slice/menuSlice";
-import { useGetReservationsQuery } from "../Slice/reservationSlice";
+import {
+  useGetMenuQuery,
+  useDeleteMenuMutation,
+  useUpdateMenuMutation,
+  useCreateMenuMutation,
+} from "../Slice/menuSlice";
+import { useGetReservationsQuery, useDeleteReservationMutation } from "../Slice/reservationSlice";
 import { formatDate, formatTime } from "../utils/formatFunction";
 import { uploadImage } from "../utils/uploadImage";
 import Swal from "sweetalert2";
@@ -56,12 +61,21 @@ const AdminUserProfile = () => {
   const [dialogType, setDialogType] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { data: tables } = useGetTablesQuery();
-  const { data: menu } = useGetMenuQuery();
-  const { data: reservations } = useGetReservationsQuery();
+  //fetching data hooks
+  const { data: tables, refetch: refetchTables } = useGetTablesQuery();
+  const { data: menu, refetch: refetchMenu } = useGetMenuQuery();
+  const { data: reservations, refetch: refetchReservations } = useGetReservationsQuery();
+  //table
   const [updateTable] = useUpdateTableMutation();
   const [deleteTable] = useDeleteTableMutation();
   const [createTable] = useCreateTableMutation();
+  //menu
+  const [deleteMenu] = useDeleteMenuMutation();
+  const [updateMenu] = useUpdateMenuMutation();
+  const [createMenu] = useCreateMenuMutation();
+//reservation
+  const [deleteReservation ] = useDeleteReservationMutation();
+
 
   const {
     register,
@@ -88,7 +102,7 @@ const AdminUserProfile = () => {
     reset();
   };
 
-  const handleDelete = (type, id) => {
+  const handleDelete = async (type, id) => {
     switch (type) {
       case "table":
         Swal.fire({
@@ -99,29 +113,81 @@ const AdminUserProfile = () => {
           confirmButtonColor: "#d33",
           cancelButtonColor: "#3085d6",
           confirmButtonText: "Yes, delete it!",
-        }).then((result) => {
+        }).then(async (result) => {
           if (result.isConfirmed) {
-            deleteTable(id)
-              .then(() => {
-                toast.success("Table deleted successfully");
-                Swal.fire(
-                  "Deleted!",
-                  "Your table has been deleted.",
-                  "success"
-                );
-              })
-              .catch((err) => {
-                toast.error("Failed to delete table");
-                Swal.fire(
-                  "Error!",
-                  "There was an issue deleting the table.",
-                  "error"
-                );
-              });
+            try {
+              await deleteTable(id).unwrap();
+              await refetchTables();
+              toast.success("Table deleted successfully");
+              Swal.fire("Deleted!", "Your table has been deleted.", "success");
+            } catch (err) {
+              toast.error("Failed to delete table");
+              Swal.fire(
+                "Error!",
+                "There was an issue deleting the table.",
+                "error"
+              );
+            }
           }
         });
         break;
       case "menu":
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              await deleteMenu(id).unwrap();
+              await refetchMenu();
+              toast.success("Menu deleted successfully");
+              Swal.fire("Deleted!", "Your menu has been deleted.", "success");
+            } catch (err) {
+              toast.error("Failed to delete menu");
+              Swal.fire(
+                "Error!",
+                "There was an issue deleting the menu.",
+                "error"
+              );
+            }
+          }
+        });
+        break;
+      case "reservation":
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              await deleteReservation(id).unwrap();
+              await refetchReservations();
+              toast.success("Reservation deleted successfully");
+              Swal.fire(
+                "Deleted!",
+                "Your reservation has been deleted.",
+                "success"
+              );
+            } catch (err) {
+              toast.error("Failed to delete reservation");
+              Swal.fire(
+                "Error!",
+                "There was an issue deleting the reservation.",
+                "error"
+              );
+            }
+          }
+        });
         break;
     }
   };
@@ -153,6 +219,18 @@ const AdminUserProfile = () => {
           } else {
             await createTable({ ...data, id: uuidv4() });
             toast.success("Table created successfully");
+          }
+          break;
+        case "menu":
+          if (selectedItem) {
+            await updateMenu({
+              ...data,
+              id: selectedItem._id,
+            });
+            toast.success("Menu updated successfully");
+          } else {
+            await createMenu({ ...data, id: uuidv4() });
+            toast.success("Menu created successfully");
           }
           break;
       }
@@ -273,6 +351,36 @@ const AdminUserProfile = () => {
             {menu?.map((item) => (
               <Grid item xs={12} sm={6} md={4} key={item._id}>
                 <Card sx={{ p: 2 }}>
+                  {item.picture && (
+                    <Box
+                      sx={{
+                        position: "relative",
+                        pt: "56.25%", // 16:9 aspect ratio
+                        mb: 2,
+                        borderRadius: 1,
+                        overflow: "hidden",
+                        backgroundColor: "background.paper",
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={item.picture}
+                        alt={item.name}
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          transition: "transform 0.3s ease",
+                          "&:hover": {
+                            transform: "scale(1.05)",
+                          },
+                        }}
+                      />
+                    </Box>
+                  )}
                   <Typography variant="h6">{item.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     {item.description}
@@ -439,6 +547,9 @@ const AdminUserProfile = () => {
                   margin="normal"
                   error={!!errors.price}
                   helperText={errors.price && "Valid price is required"}
+                  inputProps={{
+                    step: "0.01",
+                  }}
                 />
                 <TextField
                   {...register("category", { required: true })}
@@ -446,12 +557,30 @@ const AdminUserProfile = () => {
                   select
                   fullWidth
                   margin="normal"
+                  error={!!errors.category}
+                  helperText={errors.category && "Category is required"}
+                  defaultValue={selectedItem?.category || ""}
                 >
-                  <MenuItem value="Appetizer">Appetizer</MenuItem>
-                  <MenuItem value="Main Course">Main Course</MenuItem>
-                  <MenuItem value="Dessert">Dessert</MenuItem>
-                  <MenuItem value="Beverage">Beverage</MenuItem>
+                  <MenuItem value="Entrees">Entrees</MenuItem>
+                  <MenuItem value="Appetizers">Appetizers</MenuItem>
+                  <MenuItem value="Desserts">Desserts</MenuItem>
+                  <MenuItem value="Beverages">Beverages</MenuItem>
                 </TextField>
+                <Box sx={{ mt: 2 }}>
+                  <input
+                    {...register("image", { required: false })}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload">
+                    <Button variant="contained" component="span">
+                      Upload Image
+                    </Button>
+                  </label>
+                  {loading && <CircularProgress sx={{ ml: 2 }} size={24} />}
+                </Box>
               </>
             )}
 

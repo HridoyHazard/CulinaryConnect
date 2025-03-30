@@ -4,6 +4,7 @@ import colors from "colors";
 import table from "./data/table.js";
 import menuData from "./data/menuData.js";
 import Table from "./models/Table.js";
+import Item from "./models/Items.js";
 import Category from "./models/Category.js";
 
 import connectDB from "./config/db.js";
@@ -16,7 +17,8 @@ const importData = async () => {
   try {
     // ✅ Remove existing table data
     await Table.deleteMany();
-    await Category.deleteMany();
+    await Item.deleteMany();
+    // await Category.deleteMany();
 
     const sampleTables = table.map((table) => {
       return {
@@ -25,20 +27,16 @@ const importData = async () => {
       };
     });
 
-    const sampleCategories = menuData.map((category) => {
+    const sampleItems = menuData.map((item) => {
       return {
-        ...category,
-        items: category.items.map((item) => {
-          return {
-            ...item,
-            _id: new mongoose.Types.ObjectId().toHexString(),
-          };
-        }),
+        ...item,
+        id: item.id || new mongoose.Types.ObjectId().toHexString(), // ✅ Generate unique ID if missing
       };
     });
 
-    await Category.insertMany(sampleCategories);
+    // await Category.insertMany(sampleCategories);
     await Table.insertMany(sampleTables);
+    await Item.insertMany(sampleItems);
 
     console.log("Data Imported!".green.inverse);
     process.exit();
@@ -51,6 +49,7 @@ const importData = async () => {
 const destroyData = async () => {
   try {
     await Table.deleteMany();
+    await Item.deleteMany();
     await Category.deleteMany();
 
     console.log("Data Destroyed!".red.inverse);
