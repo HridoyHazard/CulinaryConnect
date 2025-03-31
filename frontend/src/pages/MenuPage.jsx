@@ -1,5 +1,5 @@
-import { Box, Typography, Container } from "@mui/material";
-import React, { useEffect, useState, useRef } from "react";
+import { Box, Typography, Container, Grid } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import MenuItem from "../components/MenuCard/MenuItem";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -21,8 +21,7 @@ const MenuPage = () => {
         return acc;
       }, {});
       setGroupedData(grouped);
-      // Force slider remount when data is loaded
-      setSliderKey((prev) => prev + 1);
+      setSliderKey((prev) => prev + 1); // Force slider remount
     }
   }, [menuData]);
 
@@ -58,47 +57,47 @@ const MenuPage = () => {
   if (error) return <Typography>Error: {error.message}</Typography>;
 
   return (
-    <Box id="Menu">
-      <Typography className="first-title" variant="h6">
-        Menu
-      </Typography>
-      <Typography className="second-title" variant="h4">
-        Discover Our Flavorful Symphony!
-      </Typography>
+    <Box
+      id="Menu"
+      sx={{ backgroundColor: "#f9f9f9", paddingTop: 4, paddingBottom: 6 }}
+    >
+      <Container maxWidth="lg">
+        <Typography className="first-title" variant="h6">
+          Menu
+        </Typography>
+        <Typography className="second-title" variant="h4">
+          Discover Our Flavorful Symphony!
+        </Typography>
 
-      {Object.keys(groupedData).map((category) => (
-        <Container
-          key={category}
-          maxWidth={false} // Remove max-width constraint
-          sx={{
-            padding: 2,
-            "& .slick-slide": {
-              padding: "0 10px",
-              boxSizing: "border-box",
-            },
-            "& .slick-list": {
-              margin: "0 -10px",
-            },
-          }}
-        >
-          <Typography component="div" variant="h5" sx={{ padding: 2 }}>
-            {category}
-          </Typography>
+        {Object.keys(groupedData).map((category) => (
+          <Box key={category} sx={{ marginBottom: 6 }}>
+            <Typography
+              component="div"
+              variant="h5"
+              sx={{ padding: 2, fontWeight: "bold" }}
+            >
+              {category}
+            </Typography>
 
-          {groupedData[category].length > 0 ? (
-            // Key now updates when data loads
-            <Slider {...sliderSettings} key={`${category}-${sliderKey}`}>
-              {groupedData[category].map((menuItem, index) => (
-                <div key={index} style={{ padding: "0 10px" }}>
-                  <MenuItem item={menuItem} />
-                </div>
-              ))}
-            </Slider>
-          ) : (
-            <Typography component="p">No items in this section</Typography>
-          )}
-        </Container>
-      ))}
+            {groupedData[category].length > 0 ? (
+              <Slider {...sliderSettings} key={`${category}-${sliderKey}`}>
+                {groupedData[category].map((menuItem, index) => (
+                  <Box key={index} sx={{ padding: "0 10px" }}>
+                    <MenuItem item={menuItem} />
+                  </Box>
+                ))}
+              </Slider>
+            ) : (
+              <Typography
+                component="p"
+                sx={{ textAlign: "center", color: "#888" }}
+              >
+                No items in this section
+              </Typography>
+            )}
+          </Box>
+        ))}
+      </Container>
     </Box>
   );
 };
