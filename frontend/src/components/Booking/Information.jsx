@@ -16,21 +16,40 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { bookingInformation } from "../../Slice/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Information = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [checkInDate, setCheckInDate] = useState(null);
-  const [checkInTime, setCheckInTime] = useState(null);
-  const [checkOutTime, setCheckOutTime] = useState(null);
+  const { bookingInformation: bookingData } = useSelector(
+    (state) => state.cart
+  );
+
+  console.log(bookingData);
+
+  const [name, setName] = useState(bookingData?.name || "");
+  const [email, setEmail] = useState(bookingData?.email || "");
+  const [checkInDate, setCheckInDate] = useState(
+    bookingData?.checkInDate ? new Date(bookingData.checkInDate) : null
+  );
+  const [checkInTime, setCheckInTime] = useState(
+    bookingData?.checkInTime ? new Date(bookingData.checkInTime) : null
+  );
+  const [checkOutTime, setCheckOutTime] = useState(
+    bookingData?.checkOutTime ? new Date(bookingData.checkOutTime) : null
+  );
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = () => {
-    const serializedCheckInDate = checkInDate ? checkInDate.toISOString() : null;
-    const serializedCheckInTime = checkInTime ? checkInTime.toISOString() : null;
-    const serializedCheckOutTime = checkOutTime ? checkOutTime.toISOString() : null;
+    const serializedCheckInDate = checkInDate
+      ? checkInDate.toISOString()
+      : null;
+    const serializedCheckInTime = checkInTime
+      ? checkInTime.toISOString()
+      : null;
+    const serializedCheckOutTime = checkOutTime
+      ? checkOutTime.toISOString()
+      : null;
 
     dispatch(
       bookingInformation({
@@ -45,8 +64,28 @@ const Information = () => {
     navigate("/tablebook");
   };
 
+  const combineDateAndTime = (date, time) => {
+    if (!date || !time) return null;
+    const newDate = new Date(date);
+    const hours = time.getHours();
+    const minutes = time.getMinutes();
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    return newDate;
+  };
+
   const isFormValid = () => {
-    return name && email && checkInDate && checkInTime && checkOutTime;
+    // First check required fields
+    if (!name || !email || !checkInDate || !checkInTime || !checkOutTime) {
+      return false;
+    }
+
+    const checkInDateTime = combineDateAndTime(checkInDate, checkInTime);
+    const checkOutDateTime = combineDateAndTime(checkInDate, checkOutTime);
+
+    return checkOutDateTime > checkInDateTime;
   };
 
   return (
@@ -142,10 +181,53 @@ const Information = () => {
                   </FormLabel>
                   <TimePicker
                     value={checkOutTime}
-                    onChange={(newValue) => setCheckOutTime(newValue)}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth />
-                    )}
+                    onChange={(newValue) => {
+                      setCheckOutTime(newValue);
+
+                      if (checkInDate && checkInTime && newValue) {
+                        const checkInDateTime = combineDateAndTime(
+                          checkInDate,
+                          checkInTime
+                        );
+                        const checkOutDateTime = combineDateAndTime(
+                          checkInDate,
+                          newValue
+                        );
+                        if (checkOutDateTime <= checkInDateTime) {
+                          toast.error(
+                            "Check-out time must be after check-in time!"
+                          );
+                        }
+                      }
+                    }}
+                    renderInput={(params) => {
+                      let isInvalid = false;
+                      let errorMessage = "";
+
+                      if (checkInDate && checkInTime && checkOutTime) {
+                        const checkInDateTime = combineDateAndTime(
+                          checkInDate,
+                          checkInTime
+                        );
+                        const checkOutDateTime = combineDateAndTime(
+                          checkInDate,
+                          checkOutTime
+                        );
+                        isInvalid = checkOutDateTime <= checkInDateTime;
+                        errorMessage = isInvalid
+                          ? "Check-out time must be after check-in time"
+                          : "";
+                      }
+
+                      return (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          error={isInvalid}
+                          helperText={errorMessage}
+                        />
+                      );
+                    }}
                   />
                 </FormControl>
               </Grid>
@@ -155,9 +237,23 @@ const Information = () => {
                   sx={{
                     mt: 3,
                     display: "flex",
-                    justifyContent: "flex-end",
+                    justifyContent: "space-between",
+                    gap: 2, // Add space between the buttons
                   }}
                 >
+                  <Button
+                    variant="outlined"
+                    onClick={() => navigate("/tables")} // Go back to the previous page
+                    size="large"
+                    sx={{
+                      px: 5,
+                      py: 1.5,
+                      fontSize: "1.1rem",
+                      borderRadius: 2,
+                    }}
+                  >
+                    Go Back
+                  </Button>
                   <Button
                     variant="contained"
                     onClick={handleSubmit}

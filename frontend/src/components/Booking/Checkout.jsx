@@ -5,6 +5,7 @@ import {
   Paper,
   Typography,
   TextField,
+  CircularProgress,
   Button,
   Divider,
   List,
@@ -42,6 +43,7 @@ import { clearCartItems } from "../../Slice/cartSlice";
 import { useCreateReservationMutation } from "../../Slice/reservationSlice";
 
 const Checkout = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
   const { bookingInformation, selectedTables, cartItems } = useSelector(
     (state) => state.cart
@@ -74,6 +76,7 @@ const Checkout = () => {
   };
 
   async function onToken(token) {
+    setIsLoading(true);
     const reservationDetails = {
       userId: userInfo.user._id,
       customer_name: bookingInformation.name,
@@ -88,13 +91,14 @@ const Checkout = () => {
         name: item.name,
         quantity: item.quantity,
         price: item.price,
-        image: item.image,
+        picture: item.picture,
       })),
       token,
     };
 
     try {
       const response = await createReservation(reservationDetails);
+      console.log(response);
       if (response.data) {
         toast.success("Reservation created successfully");
         dispatch(clearCartItems());
@@ -105,6 +109,8 @@ const Checkout = () => {
     } catch (error) {
       console.error("Error creating reservation:", error);
       toast.error("Reservation creation failed");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -192,7 +198,7 @@ const Checkout = () => {
                 cartItems.map((item, index) => (
                   <ListItem key={index} sx={{ py: 1 }}>
                     <Avatar
-                      src={item.image}
+                      src={item.picture}
                       alt={item.name}
                       sx={{ mr: 2, width: 40, height: 40 }}
                     />
@@ -282,7 +288,7 @@ const Checkout = () => {
                 variant="contained"
                 color="primary"
                 size="large"
-                disabled={!isChecked}
+                disabled={!isChecked || isLoading}
                 sx={{
                   fontWeight: "bold",
                   display: "flex",
@@ -295,9 +301,15 @@ const Checkout = () => {
                   },
                   borderRadius: "8px",
                 }}
-                startIcon={<Payment sx={{ mr: 1 }} />}
+                startIcon={
+                  isLoading ? (
+                    <CircularProgress size={20} sx={{ color: "inherit" }} />
+                  ) : (
+                    <Payment sx={{ mr: 1 }} />
+                  )
+                }
               >
-                Pay ${calculateTotal()}
+                {isLoading ? "Processing..." : `Pay $${calculateTotal()}`}
               </Button>
             </StripeCheckout>
           </Paper>

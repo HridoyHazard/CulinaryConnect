@@ -32,6 +32,7 @@ import {
   TableRestaurant as TableIcon,
   BookOnline as ReservationIcon,
   Dashboard as DashboardIcon,
+  Cancel as CancelIcon,
 } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -49,7 +50,11 @@ import {
   useUpdateMenuMutation,
   useCreateMenuMutation,
 } from "../Slice/menuSlice";
-import { useGetReservationsQuery, useDeleteReservationMutation } from "../Slice/reservationSlice";
+import {
+  useGetReservationsQuery,
+  useDeleteReservationMutation,
+  useCancelReservationMutation,
+} from "../Slice/reservationSlice";
 import { formatDate, formatTime } from "../utils/formatFunction";
 import { uploadImage } from "../utils/uploadImage";
 import Swal from "sweetalert2";
@@ -64,7 +69,8 @@ const AdminUserProfile = () => {
   //fetching data hooks
   const { data: tables, refetch: refetchTables } = useGetTablesQuery();
   const { data: menu, refetch: refetchMenu } = useGetMenuQuery();
-  const { data: reservations, refetch: refetchReservations } = useGetReservationsQuery();
+  const { data: reservations, refetch: refetchReservations } =
+    useGetReservationsQuery();
   //table
   const [updateTable] = useUpdateTableMutation();
   const [deleteTable] = useDeleteTableMutation();
@@ -73,9 +79,9 @@ const AdminUserProfile = () => {
   const [deleteMenu] = useDeleteMenuMutation();
   const [updateMenu] = useUpdateMenuMutation();
   const [createMenu] = useCreateMenuMutation();
-//reservation
-  const [deleteReservation ] = useDeleteReservationMutation();
-
+  //reservation
+  const [deleteReservation] = useDeleteReservationMutation();
+  const [cancelReservation] = useCancelReservationMutation();
 
   const {
     register,
@@ -100,6 +106,38 @@ const AdminUserProfile = () => {
     setOpenDialog(false);
     setSelectedItem(null);
     reset();
+  };
+
+  const handleCancelReservation = (reservationId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You want to cancel this reservation?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, cancel it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await cancelReservation(reservationId).unwrap();
+          await refetchReservations();
+          toast.success("Reservation cancelled successfully");
+          Swal.fire(
+            "Cancelled!",
+            "The reservation has been cancelled.",
+            "success"
+          );
+        } catch (err) {
+          toast.error("Failed to cancel reservation");
+          Swal.fire(
+            "Error!",
+            "There was an issue cancelling the reservation.",
+            "error"
+          );
+        }
+      }
+    });
   };
 
   const handleDelete = async (type, id) => {
@@ -434,23 +472,36 @@ const AdminUserProfile = () => {
                       {formatTime(reservation.check_out_time)}
                     </TableCell>
                     <TableCell>{reservation.table_no}</TableCell>
-                    <TableCell>
-                      <select
-                        value={reservation.status}
-                        onChange={(e) =>
-                          handleStatusChange(reservation._id, e.target.value)
-                        }
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Cancelled">Cancelled</option>
-                      </select>
+                    <TableCell
+                      style={{
+                        color:
+                          reservation.status === "Confirmed"
+                            ? "green"
+                            : reservation.status === "Cancelled"
+                            ? "red"
+                            : "black",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {reservation.status}
                     </TableCell>
+
                     <TableCell>
+                      {reservation.status !== "Cancelled" && (
+                        <IconButton
+                          onClick={() =>
+                            handleCancelReservation(reservation._id)
+                          }
+                          color="warning"
+                        >
+                          <CancelIcon />
+                        </IconButton>
+                      )}
                       <IconButton
                         onClick={() =>
                           handleDelete("reservation", reservation._id)
                         }
+                        color="error"
                       >
                         <DeleteIcon />
                       </IconButton>

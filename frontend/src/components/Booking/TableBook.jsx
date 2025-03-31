@@ -114,7 +114,27 @@ const TableBook = () => {
         ))}
       </Grid>
 
-      <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
+      <Box
+        sx={{
+          mt: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 2, // Add space between the buttons
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/information")} // Go back to the previous page
+          size="large"
+          sx={{
+            px: 5,
+            py: 1.5,
+            fontSize: "1.1rem",
+            borderRadius: 2,
+          }}
+        >
+          Go Back
+        </Button>
         <Button
           variant="contained"
           size="large"
@@ -130,7 +150,7 @@ const TableBook = () => {
             },
           }}
         >
-          Proceed to Checkout 
+          Proceed to Checkout
         </Button>
       </Box>
     </Box>

@@ -61,7 +61,7 @@ const reservationSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
-        image: {
+        picture: {
           type: String,
           required: true,
         },
