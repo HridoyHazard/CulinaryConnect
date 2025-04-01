@@ -84,7 +84,7 @@ const CartPage = () => {
             color="primary"
             sx={{ mt: 2 }}
           >
-            Continue Shopping
+            ADD ITEM
           </Button>
         </Box>
       ) : (

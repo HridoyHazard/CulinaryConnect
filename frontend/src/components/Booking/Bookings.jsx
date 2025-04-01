@@ -21,21 +21,16 @@ import {
   useGetReservationsQuery,
   useCancelReservationMutation,
   useGetReservationByIdQuery,
-} from "../../Slice/reservationSlice"; // Ensure correct hooks
+} from "../../Slice/reservationSlice";
 import { formatDate, formatTime } from "../../utils/formatFunction";
 import Swal from "sweetalert2";
 
 const Bookings = () => {
-  
   const dispatch = useDispatch();
-   const { userInfo } = useSelector((state) => state.auth);
-
-   console.log("UserInfo", userInfo);
+  const { userInfo } = useSelector((state) => state.auth);
   const { data, isLoading, isError, error } = useGetReservationByIdQuery(userInfo?.user?._id);
-
   const [cancelReservation] = useCancelReservationMutation();
 
-  // Handle loading and error states
   if (isLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
@@ -46,11 +41,18 @@ const Bookings = () => {
 
   if (isError) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
-        <Typography color="error">
-          Error loading bookings: {error.message}
+      <Container maxWidth="lg" sx={{ py: 4, minHeight: "100vh" }}>
+        <Typography className="first-title" variant="h4" sx={{ mb: 4 }}>
+          Your Bookings
         </Typography>
-      </Box>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 5, fontStyle: "bold", fontSize: "4rem" }}>
+            <Typography color={error.status === 404 ? "inherit" : "error"}>
+              {error.status === 404 ? "No bookings found." : `Error loading bookings: ${error.message}`}
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
     );
   }
 
@@ -98,14 +100,14 @@ const Bookings = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.length === 0 ? (
+              {data?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={9} align="center">
                     No bookings found
                   </TableCell>
                 </TableRow>
               ) : (
-                data.map((booking) => (
+                data?.map((booking) => (
                   <TableRow key={booking._id}>
                     <TableCell>{booking.table_no}</TableCell>
                     <TableCell>
@@ -115,16 +117,12 @@ const Bookings = () => {
                         <Cancel sx={{ color: "red" }} />
                       )}
                     </TableCell>
-
                     <TableCell>{booking.paymentId}</TableCell>
                     <TableCell>
                       <ul>
                         {booking.itemsMenu.map((item, index) => (
                           <li key={index}>
-                            {item.name}{" "}
-                            <span style={{ color: "red" }}>
-                              {item.quantity}
-                            </span>{" "}
+                            {item.name} <span style={{ color: "red" }}>{item.quantity}</span>
                           </li>
                         ))}
                       </ul>

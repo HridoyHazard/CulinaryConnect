@@ -82,7 +82,7 @@ const UserProfile = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, minHeight: "100vh" }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
         User Profile
       </Typography>
