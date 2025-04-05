@@ -33,6 +33,7 @@ import {
   BookOnline as ReservationIcon,
   Dashboard as DashboardIcon,
   Cancel as CancelIcon,
+  People,
 } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -55,6 +56,7 @@ import {
   useDeleteReservationMutation,
   useCancelReservationMutation,
 } from "../Slice/reservationSlice";
+import { useGetUsersQuery, useDeleteUserMutation } from "../Slice/userSlice";
 import { formatDate, formatTime } from "../utils/formatFunction";
 import { uploadImage } from "../utils/uploadImage";
 import Swal from "sweetalert2";
@@ -67,6 +69,7 @@ const AdminUserProfile = () => {
   const [loading, setLoading] = useState(false);
 
   //fetching data hooks
+  const { data: users, refetch: refetchUsers } = useGetUsersQuery();
   const { data: tables, refetch: refetchTables } = useGetTablesQuery();
   const { data: menu, refetch: refetchMenu } = useGetMenuQuery();
   const { data: reservations, refetch: refetchReservations } =
@@ -82,6 +85,11 @@ const AdminUserProfile = () => {
   //reservation
   const [deleteReservation] = useDeleteReservationMutation();
   const [cancelReservation] = useCancelReservationMutation();
+
+  //user
+  const [deleteUser] = useDeleteUserMutation();
+
+  console.log(users);
 
   const {
     register,
@@ -227,6 +235,37 @@ const AdminUserProfile = () => {
           }
         });
         break;
+      case "user":
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              await deleteUser(id).unwrap();
+              await refetchUsers();
+              toast.success("User deleted successfully");
+              Swal.fire(
+                "Deleted!",
+                "User has been deleted.",
+                "success"
+              );
+            } catch (err) {
+              toast.error("Failed to delete User");
+              Swal.fire(
+                "Error!",
+                "There was an issue deleting the User.",
+                "error"
+              );
+            }
+          }
+        });
+        break;
     }
   };
 
@@ -236,7 +275,7 @@ const AdminUserProfile = () => {
       try {
         const picture = await uploadImage(data.image[0]);
         if (picture) {
-          data.picture = picture; // Add new image URL to form data
+          data.picture = picture;
         }
       } catch (error) {
         toast.error("Image upload failed");
@@ -300,6 +339,7 @@ const AdminUserProfile = () => {
           label="Reservations"
           icon={<ReservationIcon />}
         />
+        <Tab value="users" label="Users" icon={<People />} />
       </Tabs>
 
       {currentTab === "dashboard" && (
@@ -321,6 +361,15 @@ const AdminUserProfile = () => {
               <Typography variant="h6">Active Reservations</Typography>
               <Typography variant="h4">
                 {reservations?.filter((r) => r.status === "Confirmed").length}
+              </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="h6">Total Users</Typography>
+              <Typography variant="h4">
+                {" "}
+                {users?.filter((user) => user.isAdmin !== true).length}
               </Typography>
             </Card>
           </Grid>
@@ -508,6 +557,47 @@ const AdminUserProfile = () => {
                     </TableCell>
                   </TableRow>
                 ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+      {currentTab === "users" && (
+        <Card sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenDialog("user")}
+            >
+              Add User
+            </Button>
+          </Box>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users
+                  ?.filter((user) => user.isAdmin !== true)
+                  .map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={() => handleDelete("user", user._id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>

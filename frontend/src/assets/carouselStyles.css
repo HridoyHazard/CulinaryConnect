@@ -3,6 +3,10 @@
   padding: 0 8px;
   box-sizing: border-box;
 }
+.slick-prev:before,
+.slick-next:before {
+  color: #1976d2 !important;
+}
 
 .slick-list {
   margin: 0 -8px;
@@ -35,7 +39,7 @@
 }
 
 .slick-prev {
-  left: -45px;
+  left: -60px;
 }
 
 .slick-next {

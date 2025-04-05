@@ -21,7 +21,7 @@ const MenuPage = () => {
         return acc;
       }, {});
       setGroupedData(grouped);
-      setSliderKey((prev) => prev + 1); // Force slider remount
+      setSliderKey((prev) => prev + 1); 
     }
   }, [menuData]);
 
@@ -59,7 +59,7 @@ const MenuPage = () => {
   return (
     <Box
       id="Menu"
-      sx={{ backgroundColor: "#f9f9f9", paddingTop: 4, paddingBottom: 6 }}
+      sx={{ backgroundColor: "#fff", minHeight: "100vh", paddingTop: 4, paddingBottom: 6 }}
     >
       <Container maxWidth="lg">
         <Typography className="first-title" variant="h6">

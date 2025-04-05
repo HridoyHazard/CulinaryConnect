@@ -107,7 +107,7 @@ const CartPage = () => {
                       <TableCell>
                         <Box display="flex" alignItems="center">
                           <img
-                            src={item.image}
+                            src={item.picture}
                             alt={item.name}
                             style={{
                               width: 60,

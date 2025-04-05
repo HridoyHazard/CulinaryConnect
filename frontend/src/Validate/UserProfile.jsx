@@ -227,12 +227,22 @@ const UserProfile = () => {
 
             <Grid container spacing={2}>
               {reservationData?.map((booking) => (
-                <Grid item xs={12} sm={6} lg={4} key={booking.id}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  lg={4}
+                  key={booking._id}
+                  sx={{ display: "flex" }}
+                >
                   <Card
                     sx={{
                       p: 2,
                       borderRadius: 2,
                       transition: "all 0.3s ease",
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: theme.shadows[4],
@@ -341,6 +351,7 @@ const UserProfile = () => {
                         display: "flex",
                         justifyContent: "flex-end",
                         mt: 1,
+                        marginTop: "auto",
                       }}
                     >
                       <Box

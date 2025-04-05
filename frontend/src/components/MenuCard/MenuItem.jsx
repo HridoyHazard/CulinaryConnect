@@ -32,12 +32,14 @@ const MenuItem = ({ item }) => {
       variant="outlined"
       sx={{
         borderRadius: "15px",
-        width: "280px", // Ensures that the card occupies full width
+        width: "280px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "16px",
-        minHeight: "450px", // Ensures that the card occupies full height
+        overflow: "hidden",
+        height: "450px",
+        textAlign: "center",
       }}
       className="MenuSingleCard"
     >
@@ -49,7 +51,7 @@ const MenuItem = ({ item }) => {
           width: "100%",
           height: "auto",
           borderRadius: "8px",
-          objectFit: "cover", // Ensures the image scales properly
+          objectFit: "contain", 
         }}
       />
       <Typography
@@ -59,7 +61,17 @@ const MenuItem = ({ item }) => {
       >
         {item.name}
       </Typography>
-      <Rating value={4.5} precision={0.5} size="small" sx={{ mt: 1 }} />
+      <Rating
+        value={4.5}
+        precision={0.5}
+        size="small"
+        sx={{
+          mt: 1,
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+        }}
+      />
       <Typography component="p" sx={{ mt: 1, color: "gray" }}>
         {item.description}
       </Typography>
@@ -75,13 +87,13 @@ const MenuItem = ({ item }) => {
         variant="contained"
         sx={{
           mt: 2,
-          width: "80%", // Slightly less than full width for a better look
-          mx: "auto", // Centers the button horizontally
+          width: "80%", 
+          mx: "auto", 
           borderRadius: "8px",
-          padding: "10px 0", // Padding for button size
+          padding: "10px 0", 
           "&:hover": {
-            backgroundColor: "#f50057", // Change color on hover
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", // Add subtle shadow
+            backgroundColor: "#f50057", 
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", 
           },
         }}
         onClick={addToCartHandler}
